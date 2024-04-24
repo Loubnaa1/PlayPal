@@ -50,5 +50,5 @@ Toget started with the project, follow these steps:
 
 ---
 
-* [Lounaa]
+* [Loubna Merzak(Loubnaa1)]
 * [Frank Williams Ugwu]
