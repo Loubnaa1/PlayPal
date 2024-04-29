@@ -1,0 +1,14 @@
+.home {
+  flex: 6;
+  position: sticky;
+  top: 50px;
+  height: calc(100vh - 50px);
+  overflow: scroll;
+  background-color: var(--bgSoft);
+
+  padding: 20px 70px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

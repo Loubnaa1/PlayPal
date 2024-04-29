@@ -1,0 +1,43 @@
+This is the Playpal module structure, this is a detailed diagram of how our files are structured.
+
+
+PlayPal/
+└── playpal/
+    ├── playpalenv/ (virtual environment directory)
+    └── playpal/ (Django project and application files)
+        ├── manage.py
+        ├── playpal-static/ (static files directory)
+        ├── playpal/ (main Django project directory)
+        │   ├── settings.py
+        │   ├── urls.py
+        │   └── ...
+        ├── games/ (Django game applications)
+        │   ├── templates/
+        │   │   ├── games/
+        │   │   │   ├── game_detail.html
+        │   │   │   └── ...
+        │   ├── __init__.py
+        │   ├── models.py
+        │   ├── views.py
+        │   └── ...
+        ├── users/ (Django user applications)
+        │   ├── templates/
+        │   │   ├── users/
+        │   │   │   ├── profile.html
+        │   │   │   └── ...
+        │   ├── __init__.py
+        │   ├── models.py
+        │   ├── views.py
+        │   └── ...
+        ├── community/ (Django community applications)
+        │   ├── templates/
+        │   │   ├── community/
+        │   │   │   ├── forum.html
+        │   │   │   └── ...
+        │   ├── __init__.py
+        │   ├── models.py
+        │   ├── views.py
+        │   └── ...
+        ├── tests/ (directory for tests)
+        │   └── ...
+        └── README.md

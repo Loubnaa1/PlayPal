@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Profile : {% endblock %}
+
+{% block outlet %}
+<div class="profile">
+  <div class="images">
+    <img src="/static/images/games images/ColorWall-4y3ep7.jpg" alt="cover image" class="cover">
+    <img src="/static/images/games images/ColorWall-5g6dq9.jpg" alt="profile image" class="profilePic">
+  </div>
+
+  <div class="profileContainer">
+    <div class="uInfo">
+      <div class="left">
+        <a href="#">
+          <i class="ri-facebook-circle-fill"></i>
+        </a>
+        <a href="#">
+          <i class="ri-twitch-line"></i>
+        </a>
+        <a href="#">
+          <i class="ri-discord-line"></i>
+        </a>
+        <a href="#">
+          <i class="ri-twitter-fill"></i>
+        </a>
+      </div>
+
+      <div class="center">
+        <span>Frankie Wilson</span>
+        <div class="info">
+          <div class="item">
+            <i class="ri-map-pin-line"></i>
+            <span>Nigeria</span>
+          </div>
+          <div class="item">
+            <i class="ri-global-line"></i>
+            <span>English</span>
+          </div>
+        </div>
+        <button>Follow</button>
+      </div>
+
+      <div class="right">
+        <i class="ri-mail-line"></i>
+        <i class="ri-more-2-line"></i>
+      </div>
+    </div>
+    {% include 'components/post.html' %}
+  </div>
+</div>
+{% endblock %}

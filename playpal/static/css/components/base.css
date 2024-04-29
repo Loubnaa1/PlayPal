@@ -1,0 +1,39 @@
+:root {
+  --bg: white;
+  --textColor: #000;
+  --logo: darkblue;
+  --bgSoft: #f6f3f3;
+  --textColorsoft: #555;
+  --border: lightgray;
+}
+
+body.dark-theme {
+  --bg: #222;
+  --textColor: whitesmoke;
+  --logo: white;
+  --bgSoft: #333;
+  --textColorsoft: lightgray;
+  --border: #444;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.components {
+  display: flex;
+}
+
+a {
+  text-decoration: none;
+}
+
+.main-comment {
+  display: none;
+}
+
+.outlet {
+  flex: 6;
+}

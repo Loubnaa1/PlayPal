@@ -1,0 +1,201 @@
+
+
+
+
+
+
+
+
+<!-- Post 1-->
+<div class="post">
+  <div class="container">
+    <div class="user">
+      <div class="userInfo">
+        <img src="/static/images/games images/ColorWall-4y3ep7.jpg" alt="user avater">
+        <div class="details">
+          <a href="#">
+            <span class="name">Frankie</span>
+          </a>
+          <span class="date">1 min ago</span>
+        </div>
+      </div>
+      <i class="ri-more-2-line"></i>
+    </div>
+    <div class="content">
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui omnis, illum aliquam dolorum dolor maiores!</p>
+      <img src="/static/images/games images/ColorWall-5g6lm8.jpg" alt="post image">
+    </div>
+    <div class="info">
+      <div class="item">
+        <i class="ri-heart-line"></i>
+        12 likes
+      </div>
+      <div class="item">
+        <i class="ri-chat-3-line"></i>
+        12 Comments
+      </div>
+      <div class="item">
+        <i class="ri-share-line"></i>
+        12 Share
+      </div>
+      <div class="item">
+        <i class="ri-bookmark-line"></i>
+      </div>
+    </div>
+
+    <!--Comments-->
+
+    <!-- {% include 'core/comments.html' %}
+    {% include 'core/comments.html' %} -->
+    <div class="comments">
+      <div class="write">
+        <img src="https://avatars.githubusercontent.com/u/132236591?v=4" alt="Profile-image" />
+        <input type="text" placeholder="Add comment">
+        <button>send</button>
+      </div>
+
+      <div class="comment">
+        <img src="/static/images/games images/ColorWall-5g6lm8.jpg" alt="comment image">
+        <div class="info">
+          <span>Profile name </span>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil molestias expedita voluptate in quae
+            architecto
+            non asperiores! Voluptatum, inventore et.
+          </p>
+        </div>
+        <span class="date">3 sec ago</span>
+      </div>
+
+      <div class="comment">
+        <img src="/static/images/games images/ColorWall-5g6lm8.jpg" alt="comment image">
+        <div class="info">
+          <span>Profile name </span>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil molestias expedita voluptate in quae
+            architecto
+            non asperiores! Voluptatum, inventore et.
+          </p>
+        </div>
+        <span class="date">3 sec ago</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Post 2-->
+<div class="post">
+  <div class="container">
+    <div class="user">
+      <div class="userInfo">
+        <img src="/static/images/games images/ColorWall-5g6d91.png" alt="user avater">
+        <div class="details">
+          <a href="#">
+            <span class="name">Frankie</span>
+          </a>
+          <span class="date">1 min ago</span>
+        </div>
+      </div>
+      <i class="ri-more-2-line"></i>
+    </div>
+    <div class="content">
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui omnis, illum aliquam dolorum dolor maiores!</p>
+      <img src="/static/images/games images/ColorWall-5g6dq9.jpg" alt="post image">
+    </div>
+    <div class="info">
+      <div class="item">
+        <i class="ri-heart-line"></i>
+        12 likes
+      </div>
+      <div class="item">
+        <i class="ri-chat-3-line"></i>
+        12 Comments
+      </div>
+      <div class="item">
+        <i class="ri-share-line"></i>
+        12 Share
+      </div>
+      <div class="item">
+        <i class="ri-bookmark-line"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Post 3-->
+<div class="post">
+  <div class="container">
+    <div class="user">
+      <div class="userInfo">
+        <img src="/static/images/games images/ColorWall-5g6d91.png" alt="user avater">
+        <div class="details">
+          <a href="#">
+            <span class="name">Frankie</span>
+          </a>
+          <span class="date">1 min ago</span>
+        </div>
+      </div>
+      <i class="ri-more-2-line"></i>
+    </div>
+    <div class="content">
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui omnis, illum aliquam dolorum dolor maiores!</p>
+      <!-- <img src="/static/images/games images/ColorWall-5g6ej1.jpg" alt="post image"> -->
+    </div>
+    <div class="info">
+      <div class="item">
+        <i class="ri-heart-line"></i>
+        12 likes
+      </div>
+      <div class="item">
+        <i class="ri-chat-3-line"></i>
+        12 Comments
+      </div>
+      <div class="item">
+        <i class="ri-share-line"></i>
+        12 Share
+      </div>
+      <div class="item">
+        <i class="ri-bookmark-line"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Post 3-->
+<div class="post">
+  <div class="container">
+    <div class="user">
+      <div class="userInfo">
+        <img src="/static/images/games images/ColorWall-5g6d91.png" alt="user avater">
+        <div class="details">
+          <a href="#">
+            <span class="name">Frankie</span>
+          </a>
+          <span class="date">1 min ago</span>
+        </div>
+      </div>
+      <i class="ri-more-2-line"></i>
+    </div>
+    <div class="content">
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui omnis, illum aliquam dolorum dolor maiores!</p>
+      <img src="/static/images/games images/ColorWall-5g6ej1.jpg" alt="post image">
+    </div>
+    <div class="info">
+      <div class="item">
+        <i class="ri-heart-line"></i>
+        12 likes
+      </div>
+      <div class="item">
+        <i class="ri-chat-3-line"></i>
+        12 Comments
+      </div>
+      <div class="item">
+        <i class="ri-share-line"></i>
+        12 Share
+      </div>
+      <div class="item">
+        <i class="ri-bookmark-line"></i>
+      </div>
+    </div>
+  </div>
+</div>
