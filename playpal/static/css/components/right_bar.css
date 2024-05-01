@@ -98,3 +98,10 @@
     }
   }
 }
+
+/* MEDIA Queries */
+@media (max-width: 480px) {
+  .rightBar {
+    display: none;
+  }
+}

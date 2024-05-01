@@ -61,3 +61,14 @@ nav {
     }
   }
 }
+
+/* MEDIA Queries */
+@media (max-width: 480px) {
+  input {
+    display: none;
+  }
+
+  nav .right {
+    display: none;
+  }
+}
