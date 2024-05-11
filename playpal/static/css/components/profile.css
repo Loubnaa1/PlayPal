@@ -1,0 +1,137 @@
+.profile {
+  background-color: var(--bgSoft);
+
+  .images {
+    width: 100%;
+    height: 300px;
+    position: relative;
+
+    .cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profilePic {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin: auto;
+      border: 4px solid var(--textColorsoft);
+      top: 150px;
+    }
+  }
+
+  .profileContainer {
+    padding: 20px 70px;
+
+    .uInfo {
+      height: 180px;
+      -moz-box-shadow: -8px 14px 19px -7px rgba(0, 0, 0, 0.35);
+      -webkit-box-shadow: -8px 14px 19px -7px rgba(0, 0, 0, 0.35);
+      box-shadow: -8px 14px 19px -7px rgba(0, 0, 0, 0.35);
+      border-radius: 20px;
+      background-color: var(--bg);
+      color: var(--textColor);
+      padding: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+
+      .left {
+        flex: 1;
+        display: flex;
+        gap: 10px;
+
+        a {
+          color: var(--textColorsoft);
+        }
+      }
+
+      @media (max-width: 960px) {
+        .left {
+          flex-wrap: wrap;
+        }
+      }
+
+      .center {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+
+        span {
+          font-size: 30px;
+          font-weight: 500;
+        }
+
+        .info {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+
+          .item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--textColorsoft);
+          }
+
+          span {
+            font-size: 12px;
+          }
+        }
+        button {
+          border: none;
+          background-color: #5271ff;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+      }
+
+      .right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .uInfo {
+        flex-direction: column;
+        height: 30vh;
+        padding: 20px;
+        margin-top: 50px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .uInfo {
+        margin-top: 10px;
+      }
+    }
+  }
+  @media (max-width: 480px) {
+    .profileContainer {
+      padding: 10px;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .profileContainer {
+      padding: 20px;
+    }
+  }
+}

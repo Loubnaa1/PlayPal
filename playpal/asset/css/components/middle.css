@@ -1,0 +1,31 @@
+.home {
+  flex: 6;
+  position: sticky;
+  top: 50px;
+  height: calc(100vh - 50px);
+  overflow: scroll;
+  background-color: var(--bgSoft);
+
+  padding: 20px 70px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  h1 {
+    align-items: center;
+  }
+}
+
+/* MEDIA Queries */
+@media (max-width: 480px) {
+  .home {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 960px) {
+  .home {
+    padding: 20px;
+  }
+}
