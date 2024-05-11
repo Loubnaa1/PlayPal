@@ -1,0 +1,72 @@
+{% for post in posts %}
+<div class="post">
+  <div class="container">
+    <div class="user">
+      <div class="userInfo">
+        <a href="{% url 'users:profile' %}">
+          <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avatar">
+        </a>
+        <div class="details">
+          <a href="#">
+            <span class="name">{{ post.author.username }}</span>
+          </a>
+          <span class="date">{{ post.created_at |timesince }} ago</span>
+        </div>
+      </div>
+      <div class="more-options" id="more-options">
+        <i class="ri-more-2-line"></i>
+        <div class="dropdown-menu" id="dropdown-menu">
+          <a href="#" class="dropdown-item">
+            <button>Report Post</button>
+          </a>
+          <!-- if user == post.user -->
+          <a href="#" class="dropdown-item">
+            <button>Edit Post</button>
+          </a>
+          <a href="#" class="dropdown-item">
+            <button>Delete Post</button>
+          </a>
+          <!-- endif -->
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <a href="{% url 'core:post-detail' post.id %}">
+        <p>
+          {{ post.excerpt }}
+        </p>
+        {% if post.image %}
+        <img src="{{ post.image.url }}" alt="post image">
+        {% endif %}
+      </a>
+    </div>
+    <div class="info">
+      <div class="item">
+        <i class="ri-heart-line"></i>
+        12 likes
+      </div>
+      <div class="item toggle-comments">
+        <a href="{% url 'core:post-detail' post.id %}">
+
+          <i class="ri-chat-3-line"></i>
+          12 Comments
+        </a>
+      </div>
+      <div class="item">
+        <i class="ri-share-line"></i>
+        12 Share
+      </div>
+      <div class="item">
+        <i class="ri-bookmark-line"></i>
+        Bookmarks
+      </div>
+      <div class="item">
+        <a href="#">
+          <i class="ri-chat-thread-line"></i>
+          <span>Category: {{ post.category }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}

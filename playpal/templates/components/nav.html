@@ -7,17 +7,22 @@
       <i class="ri-home-4-line"></i>
     </a>
     <i class="ri-moon-line"></i>
-    <div class="search">
-      <i class="ri-search-2-line"></i>
-      <input type="text" placeholder="Search...">
-    </div>
+    <form method="get" action="{% url 'core:search' %}">
+      <div class="search">
+        <i class="ri-search-2-line"></i>
+        <input class="hide-mobile" type="text" name="query" placeholder="Search...">
+      </div>
+    </form>
   </div>
 
-  <div class="right">
-    <div class="user">
-      <img src="https://avatars.githubusercontent.com/u/132236591?v=4" alt="Profile-image" />
-      <span>Frankie</span>
-    </div>
+  <div class="right hide-mobile">
+    <a href="{% url 'users:profile' %}">
+      <div class="user">
+        <img src="{{ user.profilemodel.profile_image.url }}" alt="Profile-image" />
+        <span>{{ user.username }}</span>
+      </div>
+    </a>
+    <a href="{% url 'users:logout' %}">logout</a>
     <i class="ri-user-line"></i>
     <i class="ri-notification-2-line"></i>
     <i class="ri-mail-line"></i>

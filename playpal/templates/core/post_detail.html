@@ -1,7 +1,70 @@
 {% extends 'base.html' %}
-{% block title %}post details : {% endblock %}
+{% block title %}Post details : {% endblock %}
 {% block outlet %}
-<h1 style="background-color: red;">Post detail</h1>
 
-<a href="{% url 'core:index-page' %}">back to</a>
+{% if post %}
+<div class="home">
+  <div class="post">
+    <div class="container">
+      <div class="user">
+        <div class="userInfo">
+          <a href="{% url 'users:profile' %}">
+            <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avater">
+          </a>
+          <div class="details">
+            <a href="#">
+              <span class="name">{{ post.author.username }}</span>
+            </a>
+            <span class="date">{{ post.created_at }}</span>
+          </div>
+        </div>
+        <div class="more-options" id="more-options">
+          <i class="ri-more-2-line"></i>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <a href="#" class="dropdown-item">Report Post</a>
+            {% if post.author.user == request.user %}
+            <a href="{% url 'core:edit-post' post.id %}" class="dropdown-item">Edit Post</a>
+            <a href="{% url 'core:delete-post' post.id %}" class="dropdown-item">Delete Post</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="content">
+        {% if post.image %}
+
+        <img src="{{ post.image.url }}" alt="post image">
+        {% endif %}
+        <p>{{ post.content }}</p>
+      </div>
+      <div class="info">
+        <div class="item">
+          <i class="ri-heart-line"></i>
+          12 likes
+        </div>
+        <div class="item toggle-comments">
+          <i class="ri-chat-3-line"></i>
+          12 Comments
+        </div>
+        <div class="item">
+          <i class="ri-share-line"></i>
+          12 Share
+        </div>
+        <div class="item">
+          <i class="ri-bookmark-line"></i>
+          Bookmarks
+        </div>
+        <div class="item">
+          <a href="{% url 'core:category' post.slug %}"></a>
+          <i class="ri-chat-thread-fill"></i>
+          <span>Category: {{ post.category }}</span>
+          </a>
+        </div>
+      </div>
+      {% include 'components/comment.html' %}
+    </div>
+    {% else %}
+    <h1>No post</h1>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-q3ji28#w%-9$q1e7l6&b-9zc8lv=kri@=-bv-j!@eqdx6-3x0p"
+SECRET_KEY = "django-insecure-1m7d+=wwz52v69(b$p)9&w%c5m03xcfab*-f=0u0ek_38j02$x"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -36,9 +36,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "core.apps.CoreConfig",
-    "users",
+    "users.apps.UsersConfig",
+    "crispy_forms",
+    "crispy_bootstrap5",
+    "landing",
 ]
 
 MIDDLEWARE = [
@@ -68,6 +72,10 @@ TEMPLATES = [
         },
     },
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+CRISPY_LABEL_CLASS = ""
 
 WSGI_APPLICATION = "playpal.wsgi.application"
 
@@ -121,7 +129,13 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+LOGIN_REDIRECT_URL = "core:index-page"
+
+
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+STATIC_ROOT = BASE_DIR / 'asset'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

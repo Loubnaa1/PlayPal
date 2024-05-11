@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Edit Post : {% endblock %}
+{% block outlet %}
+{% load crispy_forms_tags %}
+
+{% if post %}
+<div class="home">
+  <div class="post">
+    <div class="container">
+      <div class="user">
+        <div class="userInfo">
+          <a href="{% url 'users:profile' %}">
+            <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avater">
+          </a>
+          <div class="details">
+            <a href="#">
+              <span class="name">{{ post.author.username }}</span>
+            </a>
+            <span class="date">{{ post.created_at }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="content">
+        <h3>Edit Post</h3>
+        <form method="POST">
+          {% csrf_token %}
+          {{ form|crispy }}
+          <input type="submit" value="save">
+        </form>
+      </div>
+      {% else %}
+      <h1>No post</h1>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+<!-- Login Page html -->
+{% extends 'users/base_user.html' %}
+{% block title %}Login : {% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="sign_up">
+  <div class="card">
+    <div class="left">
+      <h1>Welcome Pall!</h1>
+      <p>Welcome back
+
+        forgotten password? <br>
+        click <a href="#">here</a> to reset password
+      </p>
+      <span>Not a registered member?</span>
+      <a href="{% url 'users:sign-up' %}">
+        <button>Sign Up</button>
+      </a>
+    </div>
+    <div class="right">
+      <h1>Login Page</h1>
+      <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <!-- <input type="text" placeholder="Username" />
+        <input type="password" placeholder="password" /> -->
+        <button>Login</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

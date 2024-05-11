@@ -1,0 +1,71 @@
+/* Body Background */
+:root {
+  --bg: white;
+  --textColor: #000;
+  --logo: darkblue;
+  --bgSoft: #f6f3f3;
+  --textColorsoft: #555;
+  --border: lightgray;
+}
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+body {
+  background: linear-gradient(to bottom right, #331a66, #4d2080);
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  color: #ffffff; /* Bright white for headers */
+}
+
+p {
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  color: #e6e6e6; /* Light gray for paragraphs */
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #6b1aff;
+  border-color: #6b1aff;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #5214cc;
+  border-color: #5214cc;
+}
+
+/* community section */
+.community-section {
+  background-color: var(--bgSoft);
+}
+
+.community-section .container h2 {
+  color: var(--textColorsoft);
+}
+
+.feature {
+  color: darkcyan;
+}
+
+/* testmony section */
+.testimonial-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.testimonial-card {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}

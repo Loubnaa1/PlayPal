@@ -1,10 +1,12 @@
-<div class="leftBar">
+<div class="leftBar hide-mobile">
   <div class="container">
     <div class="menu">
-      <div class="user">
-        <img src="https://avatars.githubusercontent.com/u/132236591?v=4" alt="Profile-image" />
-        <span>Frankie</span>
-      </div>
+      <a href="{% url 'users:profile' %}">
+        <div class="user">
+          <img src="{{ user.profilemodel.profile_image.url }}" alt="Profile-image" />
+          <span>{{ user.username }}</span>
+        </div>
+      </a>
       <div class="item">
         <img src="/static/images/icons/group-line.png" alt="friends icon" />
         <span>Friends</span>
@@ -18,10 +20,12 @@
 
       <div class="menu">
         <span>Quick Access</span>
-        <div class="item">
-          <img src="/static/images/icons/gamepad-line.png" alt="game-icon" />
-          <span>Games</span>
-        </div>
+        <a href="{% url 'core:games' %}">
+          <div class="item">
+            <img src="/static/images/icons/gamepad-line.png" alt="game-icon" />
+            <span>Games</span>
+          </div>
+        </a>
         <div class="item">
           <img src="/static/images/icons/bookmark-line.png" alt="bookmark-icon" />
           <span>Bookmarks</span>
@@ -34,15 +38,3 @@
     </div>
   </div>
 </div>
-
-
-
-<!-- LEFTBAR -->
-<!-- <div class="leftbar">
-  <div class="container">
-    <div class="menu">
-      
-      
-    </div>
-  </div>
-</div> -->

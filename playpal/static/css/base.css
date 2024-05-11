@@ -28,14 +28,58 @@ body.dark-theme {
 
 a {
   text-decoration: none;
-}
-
-.main-comment {
-  display: none;
+  color: var(--textColor);
 }
 
 .outlet {
   flex: 6;
 }
 
+.post {
+  .container {
+    .content {
+      p {
+        margin: 10px;
+      }
+    }
+  }
+}
 
+/* comments */
+
+.more-options .ri-more-2-line {
+  display: block;
+  cursor: pointer;
+}
+
+.more-options.show .ri-more-2-line.hide {
+  display: none;
+}
+
+.dropdown-menu {
+  /* display: none; */
+  display: flex;
+  flex-direction: column;
+  background-color: thistle;
+}
+
+.dropdown-item {
+  margin: 5px;
+}
+
+/*
+.dropdown-menu.show {
+  display: block;
+} */
+
+@media (max-width: 480px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .hide-tab {
+    display: none;
+  }
+}

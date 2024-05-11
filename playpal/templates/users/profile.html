@@ -3,11 +3,12 @@
 
 {% block title %}Profile : {% endblock %}
 
+
 {% block outlet %}
 <div class="profile">
   <div class="images">
-    <img src="/static/images/games images/ColorWall-4y3ep7.jpg" alt="cover image" class="cover">
-    <img src="/static/images/games images/ColorWall-5g6dq9.jpg" alt="profile image" class="profilePic">
+    <img src="{{ user.profilemodel.cover_image.url }}" alt="cover image" class="cover">
+    <img src="{{ user.profilemodel.profile_image.url }}" alt="profile image" class="profilePic">
   </div>
 
   <div class="profileContainer">
@@ -28,7 +29,7 @@
       </div>
 
       <div class="center">
-        <span>Frankie Wilson</span>
+        <span>{{ user.username }}</span>
         <div class="info">
           <div class="item">
             <i class="ri-map-pin-line"></i>
@@ -39,7 +40,9 @@
             <span>English</span>
           </div>
         </div>
-        <button>Follow</button>
+        <a href="#">
+          <button>Edit Profile</button>
+        </a>
       </div>
 
       <div class="right">
@@ -47,7 +50,25 @@
         <i class="ri-more-2-line"></i>
       </div>
     </div>
-    {% include 'components/post.html' %}
+    {% load crispy_forms_tags %}
+    <ul>
+      <li>
+        <!-- <img src="{{ user.profilemodel.cover_image.url }}" alt="cover image" style="width: 100px; height: 100px;"> -->
+      </li>
+      <li>
+        <img src="{{ user.profilemodel.profile_image.url }}" alt="profile image" style="width: 100px; height: 100px;">
+      </li>
+
+      <li>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ u_form|crispy }}
+          {{ p_form|crispy }}
+          <button type="submit">save</button>
+        </form>
+      </li>
+    </ul>
   </div>
 </div>
 {% endblock %}
+
