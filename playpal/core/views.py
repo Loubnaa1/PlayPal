@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Category
+from .models import Post, Category, Like
 from .forms import CommentForm, PostForm, PostUpdateForm
 from django.http import HttpResponse
 from django.utils.text import slugify
@@ -10,16 +10,15 @@ from django.utils.text import slugify
 
 def index_page(request):
     """renders the front page"""
-    posts = Post.objects.filter(status=Post.ACTIVE).exclude(slug="")
+    posts = Post.objects.filter(status=Post.ACTIVE)
 
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
             instance = form.save(commit=False)
             instance.author = request.user
-            instance.slug = slugify(instance.content[:50])
             instance.save()
-            return redirect("core:post-detail", slug=instance.slug)
+            return redirect("core:post-detail", pk=instance.id)
     else:
         form = PostForm()
 
@@ -37,14 +36,19 @@ def post_detail(request, pk, status=Post.ACTIVE):
     post = get_object_or_404(Post, id=pk)
 
     if request.method == "POST":
+        if 'like' in request.POST:
+            like, created = Like.objects.get_or_create(user=request.user, post=post)
+            if not created:
+                like.delete()
         form = CommentForm(request.POST)
 
         if form.is_valid():
             comment = form.save(commit=False)
+            comment.user = request.user
             comment.post = post
             comment.save()
 
-            return redirect("core:post-detail", id=post.id)
+            return redirect("core:post-detail", pk=post.id)
     else:
         form = CommentForm()
 

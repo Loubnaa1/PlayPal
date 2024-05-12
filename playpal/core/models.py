@@ -41,6 +41,14 @@ class Post(models.Model):
     class Meta:
         ordering = ("-created_at",)
 
+    def comment_count(self):
+        """Counts the comment of a post"""
+        return self.comments.all().count()
+    
+    def total_likes(self):
+        return self.likes.count()
+    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.content[:50])
@@ -60,56 +68,29 @@ class Post(models.Model):
         """Gets the absolute url"""
         return f"/{self.slug}/"
 
-    @property
-    def excerpt(self):
-        """Returns the first 50 characters of the content"""
-        return self.content[:50]
-
-
-# class Post(models.Model):
-#     ACTIVE = "active"
-#     DRAFT = "draft"
-
-#     CHOICES_STATUS = [(ACTIVE, "Active"), (DRAFT, "Draft")]
-
-#     # category = models.ForeignKey(
-#     #     Category, related_name="posts", on_delete=models.CASCADE, null=True, blank=True
-#     # )
-#     content = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     status = models.CharField(max_length=10, choices=CHOICES_STATUS, default=ACTIVE)
-#     image = models.ImageField(upload_to="uploads/", blank=True, null=True)
-#     author = models.ForeignKey(User, on_delete=models.CASCADE)
-
-#     class Meta:
-#         ordering = ("-created_at",)
-
-#     def __str__(self):
-#         return f"Post {self.id}"
-
-#     def get_absolute_url(self):
-#         """Gets the absolute url"""
-#         return f"/{self.id}/"
-
-#     @property
-#     def excerpt(self):
-#         """Returns the first 50 characters of the content"""
-#         return self.content[:50]
 
 class Comment(models.Model):
     """A comment class"""
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.CharField(max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)
 
     def __str__(self):
-        return self.name
+        return self.content
 
 
 class Follow(models.Model):
     pass
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now=True)  
+
+
+

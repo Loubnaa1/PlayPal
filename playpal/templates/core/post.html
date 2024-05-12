@@ -13,22 +13,6 @@
           <span class="date">{{ post.created_at |timesince }} ago</span>
         </div>
       </div>
-      <div class="more-options" id="more-options">
-        <i class="ri-more-2-line"></i>
-        <div class="dropdown-menu" id="dropdown-menu">
-          <a href="#" class="dropdown-item">
-            <button>Report Post</button>
-          </a>
-          <!-- if user == post.user -->
-          <a href="#" class="dropdown-item">
-            <button>Edit Post</button>
-          </a>
-          <a href="#" class="dropdown-item">
-            <button>Delete Post</button>
-          </a>
-          <!-- endif -->
-        </div>
-      </div>
     </div>
     <div class="content">
       <a href="{% url 'core:post-detail' post.id %}">
