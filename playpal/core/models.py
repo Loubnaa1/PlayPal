@@ -3,36 +3,15 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 
 
-class Category(models.Model):
-    """A category class that inherits from models module"""
-
-    title = models.CharField(max_length=255)
-    slug = models.SlugField()
-
-    class Meta:
-        ordering = ("title",)
-        verbose_name_plural = "Categories"
-
-    def __str__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        """Gets the absolute url"""
-        return "/%s/" % self.slug
-
-
 # Create your models here.
 class Post(models.Model):
     ACTIVE = "active"
     DRAFT = "draft"
 
     CHOICES_STATUS = [(ACTIVE, "Active"), (DRAFT, "Draft")]
-
-    # category = models.ForeignKey(
-    #     Category, related_name="posts", on_delete=models.CASCADE, null=True, blank=True
-    # )
+    
     slug = models.SlugField(unique=True, blank=True, null=True)
-    content = models.TextField()
+    content = models.TextField(max_length=400)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=CHOICES_STATUS, default=ACTIVE)
     image = models.ImageField(upload_to="uploads/", blank=True, null=True)
@@ -44,10 +23,10 @@ class Post(models.Model):
     def comment_count(self):
         """Counts the comment of a post"""
         return self.comments.all().count()
-    
-    def total_likes(self):
+
+    def get_like_count(self):
+        """A cound method that returns the number of likes for the post"""
         return self.likes.count()
-    
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -69,12 +48,30 @@ class Post(models.Model):
         return f"/{self.slug}/"
 
 
+class Follow(models.Model):
+    pass
+
+
+class Like(models.Model):
+    """
+    A like models that stores the information about like
+    Fields:
+        post-> A ForeignKey to the post model, representing the post that is being liked.
+        user-> A ForegnKey to the post model, representing the user who liked the post.
+        created_at-> a DatetimeField to store the timestamp when the like was created.
+    """
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_likes")
+    created_at = models.DateTimeField(auto_now=True)
+
+
 class Comment(models.Model):
     """A comment class"""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
-    content = models.CharField(max_length=300)
+    content = models.CharField(max_length=250)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -84,13 +81,19 @@ class Comment(models.Model):
         return self.content
 
 
-class Follow(models.Model):
-    pass
+class Category(models.Model):
+    """A category class that inherits from models module"""
 
-class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
-    created_at = models.DateTimeField(auto_now=True)  
+    title = models.CharField(max_length=255)
+    slug = models.SlugField()
 
+    class Meta:
+        ordering = ("title",)
+        verbose_name_plural = "Categories"
 
+    def __str__(self):
+        return self.title
 
+    def get_absolute_url(self):
+        """Gets the absolute url"""
+        return "/%s/" % self.slug

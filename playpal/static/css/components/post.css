@@ -72,3 +72,20 @@
     }
   }
 }
+
+.like-btn,
+.unlike-btn {
+  color: #ff6b6b;
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.unlike-btn {
+  color: #ff6b6b;
+}
+
+.like-btn:hover,
+.unlike-btn:hover {
+  color: #e53935;
+}

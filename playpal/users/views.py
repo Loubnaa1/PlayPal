@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .form import SignUpForm, UserUpdateForm, ProfileUpdateForm
 from django.http import HttpResponse
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -23,13 +24,12 @@ def sign_up(request):
     }
     return render(request, "users/sign_up.html", context)
 
-
 def logout_view(request):
     """A logout function"""
     logout(request)
     return redirect("users:login")
 
-
+login_required()
 def user_profile(request):
     """A function that enables user to update profile"""
     if request.method == "POST":

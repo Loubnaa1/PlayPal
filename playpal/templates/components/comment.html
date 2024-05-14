@@ -22,6 +22,11 @@
       </p>
     </div>
     <span class="date">{{ comment.created_at }}</span>
+    {% if request.user == comment.user %}
+    <strong>
+      <a href="{% url 'core:comment-delete' post.pk comment.pk %}">Delete comment</a>
+    </strong>
+    {% endif %}
   </div>
   {% endfor %}
 </div>

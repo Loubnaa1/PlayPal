@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Delete Comment : {% endblock %}
+{% block outlet %}
+
+<div class="home">
+  <div class="post">
+    <div class="container">
+      <p>This action can't be undone after deleting this post</p>
+      <form method="POST">
+        {% csrf_token %}
+         <a href="{% url 'core:post-detail' post.id %}">Cancel</a>
+        <button type="submit">Continue</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

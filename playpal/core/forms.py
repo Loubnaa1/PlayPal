@@ -5,7 +5,15 @@ from .models import Comment, Post
 class PostForm(forms.ModelForm):
     """Handles the post form"""
 
-    content = forms.CharField(widget=forms.Textarea(attrs={"rows": 1}), label=False)
+    content = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Share your gaming experiences with the community..",
+            }
+        ),
+        label=False,
+    )
 
     class Meta:
         model = Post
@@ -13,12 +21,22 @@ class PostForm(forms.ModelForm):
 
 
 class CommentForm(forms.ModelForm):
+    content = forms.CharField(
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "rows": 2,
+                "placeholder": "Add your thoughts...",
+            }
+        ),
+    )
+
     class Meta:
         model = Comment
         fields = ("content",)
         widgets = {
             "content": forms.Textarea(
-                attrs={"placeholder": "write your comment here...", "rows": 1}
+                attrs={"placeholder": "write your comment here...", "rows": 3}
             ),
         }
         labels = {

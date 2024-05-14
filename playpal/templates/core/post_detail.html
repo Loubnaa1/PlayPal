@@ -38,16 +38,18 @@
       </div>
       <div class="info">
         <div class="item">
+          {% if request.user.is_authenticated %}
           {% if request.user in post.likes.all %}
-          <a href="{% url 'core:post-detail' post.id %}" class="like-btn" id="lik-btn" data-liked="true">
-          <i class="ri-heart-line"></i>
+          <a href="{% url 'core:like-post' post.id %}" class="like-btn active">
+            <i class="ri-heart-fill"></i>
           </a>
           {% else %}
-          <a href="{% url 'core:post-detail' post.id %}" class="like-btn" data-liked"false">
-          <i class="ri-heart-line"></i>
+          <a href="{% url 'core:like-post' post.id %}" class="unlike-btn">
+            <i class="ri-heart-line"></i>
           </a>
           {% endif %}
-          {{ post.total_likes }} likes
+          {% endif %}
+          {{ post.get_like_count }} likes
         </div>
         <div class="item toggle-comments">
           <i class="ri-chat-3-line"></i>
