@@ -7,8 +7,8 @@
 {% block outlet %}
 <div class="profile">
   <div class="images">
-    <img src="{{ user.profilemodel.cover_image.url }}" alt="cover image" class="cover">
-    <img src="{{ user.profilemodel.profile_image.url }}" alt="profile image" class="profilePic">
+    <img src="{{ profile.cover_image.url }}" alt="cover image" class="cover">
+    <img src="{{ profile.profile_image.url }}" alt="profile image" class="profilePic">
   </div>
 
   <div class="profileContainer">
@@ -29,46 +29,74 @@
       </div>
 
       <div class="center">
+        {% if profile.name %}
+        <span>{{ profile.name }}</span>
+        {% else %}
         <span>{{ user.username }}</span>
+        {% endif %}
         <div class="info">
           <div class="item">
             <i class="ri-map-pin-line"></i>
-            <span>Nigeria</span>
+            {% if profile.location %}
+            <span>{{ profile.location }}</span>
+            {% endif %}
+          </div>
+          <div class="item">
+            <i class="ri-map-pin-line"></i>
+            {% if profile.dob %}
+            <span>{{ profile.dob }}</span>
+            {% endif %}
           </div>
           <div class="item">
             <i class="ri-global-line"></i>
-            <span>English</span>
+            {% if profile.language %}
+            <span>{{ profile.language }}</span>
+            {% endif %}
           </div>
         </div>
-        <a href="#">
-          <button>Edit Profile</button>
-        </a>
+        {% if request.user == user %}
+        <a href="{% url 'users:profile-edit' profile.pk %}">Edit Profile</a>
+        {% else %}
+        {% if is_following %}
+        <form method="POST" action="{% url 'users:remove-follower' profile.pk %}">
+          {% csrf_token %}
+          <button type="submit">Unfollow</button>
+        </form>
+        {% else %}
+        <form method="POST" action="{% url 'users:add-follower' profile.pk %}">
+          {% csrf_token %}
+          <button type="submit">Follow</button>
+        </form>
+        {% endif %}
+        {% endif %}
       </div>
 
       <div class="right">
+        <p>{{ number_of_followers}} followers</p>
         <i class="ri-mail-line"></i>
         <i class="ri-more-2-line"></i>
       </div>
     </div>
-    {% load crispy_forms_tags %}
     <ul>
       <li>
-        <!-- <img src="{{ user.profilemodel.cover_image.url }}" alt="cover image" style="width: 100px; height: 100px;"> -->
+        <h3>bio</h3>
+        {% if profile.bio %}
+        {{ profile.bio }}
+        {% endif %}
       </li>
       <li>
-        <img src="{{ user.profilemodel.profile_image.url }}" alt="profile image" style="width: 100px; height: 100px;">
+        <h1>Posts</h1>
       </li>
-
       <li>
-        <form method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          {{ u_form|crispy }}
-          {{ p_form|crispy }}
-          <button type="submit">save</button>
-        </form>
+        {% for post in posts %}
+      <li>
+        <p><a href="{% url 'users:profile' post.author.profile.pk %}">@{{ post.author }}</a></p>
+        <a href="{% url 'core:post-detail' post.id %}"></a>
+        {{ post.content }}
+      </li>
+      {% endfor %}
       </li>
     </ul>
   </div>
 </div>
 {% endblock %}
-

@@ -2,7 +2,7 @@
 <div class="comments">
   <div class="write">
     <!-- Current user image-->
-    <img src="{{ request.user.profilemodel.profile_image.url }}" alt="user profile avatar" />
+    <img src="{{ request.user.profile.profile_image.url }}" alt="user profile avatar" />
     <form method="POST">
       {% csrf_token %}
       {{ form|crispy }}
@@ -13,7 +13,7 @@
   <hr>
   {% for comment in post.comments.all %}
   <div class="comment">
-    <img src="{{ comment.user.profilemodel.profile_image.url }}" alt="Commentor's profile avatar">
+    <img src="{{ comment.user.profile.profile_image.url }}" alt="Commentor's profile avatar">
 
     <div class="info2">
       <span>{{ comment.user.username }}</span>

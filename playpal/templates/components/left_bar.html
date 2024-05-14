@@ -1,10 +1,10 @@
 <div class="leftBar hide-mobile">
   <div class="container">
     <div class="menu">
-      <a href="{% url 'users:profile' %}">
+      <a href="{% url 'users:profile' request.user.pk %}">
         <div class="user">
-          <img src="{{ user.profilemodel.profile_image.url }}" alt="Profile-image" />
-          <span>{{ user.username }}</span>
+          <img src="{{ request.user.profile.profile_image.url }}" alt="Profile-image" />
+          <span>{{ request.user.username }}</span>
         </div>
       </a>
       <div class="item">

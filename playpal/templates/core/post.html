@@ -3,12 +3,12 @@
   <div class="container">
     <div class="user">
       <div class="userInfo">
-        <a href="{% url 'users:profile' %}">
-          <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avatar">
+        <a href="{% url 'users:profile' post.author.profile.pk %}">
+          <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avatar">
         </a>
         <div class="details">
-          <a href="#">
-            <span class="name">{{ post.author.username }}</span>
+          <a href="{% url 'users:profile' post.author.profile.pk %}">
+            <span class="name">@{{ post.author.username }}</span>
           </a>
           <span class="date">{{ post.created_at |timesince }} ago</span>
         </div>
