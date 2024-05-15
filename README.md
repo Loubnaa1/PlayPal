@@ -1,20 +1,36 @@
 # PlayPal: Connect, Play, Share, and Level Up Together
 
 PlayPal is a social gaming platform designed to revolutionize your gaming experience. Whether you're a seasoned gamer or just starting, PlayPal provides a vibrant community where you can connect with fellow gamers, discover new games, and level up together.
+
+
 ![Alt Text](image.png)
+
+
+
 
 ## Usages
 
 1. **Create an Account:**
    Sign up for a PlayPal account using your email address to access all features.
+
+
+
 ![Alt Text](app1.png)
 
 2. **Discover Games:**
    Explore a vast catalog of games, discover new titles, and find recommendations based on your preferences.
+
+
 ![Alt Text](app3.png)
+
+
 3. **Connect with Gamers:**
    Join communities, participate in discussions, and connect with gamers who share your interests.
+
+
+
 ![Alt Text](app2.png)
+
 
 4. **Level Up Together:**
    Collaborate with other players, share tips and strategies, and conquer challenges together.
