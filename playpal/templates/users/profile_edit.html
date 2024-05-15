@@ -6,14 +6,16 @@
   <li>
     <img src="{{ user.profilemodel.profile_image.url }}" alt="profile image" style="width: 100px; height: 100px;">
   </li>
-
   <li>
-    <form method=" POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ u_form|crispy }}
-    {{ p_form|crispy }}
-    <button type="submit">save</button>
-    <button type="button">cancel</button>
+    <h4>Update your profile</h4>
+  </li>
+  <li>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <a href="{% url 'users:profile' object.pk %}">cancel</a>
+      <button type="submit">save</button>
     </form>
+  </li>
   </li>
 </ul>

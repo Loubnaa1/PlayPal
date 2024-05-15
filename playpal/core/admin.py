@@ -34,7 +34,7 @@ class CommentAdmin(admin.ModelAdmin):
     """A Comment class for the admin with public attributes that defines the search functionality in he admin pannel"""
 
     # search_fields = ["title"]
-    list_display = ["name", "post", "created_at"]
+    list_display = ["user", "post", "created_at"]
 
 
 # Register your models here.

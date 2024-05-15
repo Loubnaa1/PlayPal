@@ -2,14 +2,13 @@
 {% block title %}Post details : {% endblock %}
 {% block outlet %}
 
-{% if post %}
 <div class="home">
   <div class="post">
     <div class="container">
       <div class="user">
         <div class="userInfo">
-          <a href="{% url 'users:profile' %}">
-            <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avater">
+          <a href="{% url 'users:profile' post.author.pk %}">
+            <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avater">
           </a>
           <div class="details">
             <a href="#">
@@ -21,10 +20,11 @@
         <div class="more-options" id="more-options">
           <i class="ri-more-2-line"></i>
           <div class="dropdown-menu" id="dropdown-menu">
-            <a href="#" class="dropdown-item">Report Post</a>
-            {% if post.author.user == request.user %}
+            {% if post.author == request.user %}
             <a href="{% url 'core:edit-post' post.id %}" class="dropdown-item">Edit Post</a>
             <a href="{% url 'core:delete-post' post.id %}" class="dropdown-item">Delete Post</a>
+            {% else %}
+            <a href="#" class="dropdown-item">Report Post</a>
             {% endif %}
           </div>
         </div>
@@ -38,12 +38,22 @@
       </div>
       <div class="info">
         <div class="item">
-          <i class="ri-heart-line"></i>
-          12 likes
+          {% if request.user.is_authenticated %}
+          {% if request.user in post.likes.all %}
+          <a href="{% url 'core:like-post' post.id %}" class="like-btn active">
+            <i class="ri-heart-fill"></i>
+          </a>
+          {% else %}
+          <a href="{% url 'core:like-post' post.id %}" class="unlike-btn">
+            <i class="ri-heart-line"></i>
+          </a>
+          {% endif %}
+          {% endif %}
+          {{ post.get_like_count }} likes
         </div>
         <div class="item toggle-comments">
           <i class="ri-chat-3-line"></i>
-          12 Comments
+          Comments : {{ post.comment_count }}
         </div>
         <div class="item">
           <i class="ri-share-line"></i>
@@ -62,9 +72,6 @@
       </div>
       {% include 'components/comment.html' %}
     </div>
-    {% else %}
-    <h1>No post</h1>
-    {% endif %}
   </div>
 </div>
 {% endblock %}

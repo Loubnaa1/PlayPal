@@ -131,6 +131,8 @@ STATICFILES_DIRS = [
 
 LOGIN_REDIRECT_URL = "core:index-page"
 
+LOGIN_URL = 'users:login'
+
 
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"

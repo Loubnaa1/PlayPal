@@ -2,7 +2,7 @@
 <div class="comments">
   <div class="write">
     <!-- Current user image-->
-    <img src="{{ user.profilemodel.profile_image.url }}" alt="user profile avatar" />
+    <img src="{{ request.user.profile.profile_image.url }}" alt="user profile avatar" />
     <form method="POST">
       {% csrf_token %}
       {{ form|crispy }}
@@ -13,15 +13,20 @@
   <hr>
   {% for comment in post.comments.all %}
   <div class="comment">
-    <img src="{{ post.author.profilemodel.profile_image.url }}" alt="Commentor's profile avatar">
+    <img src="{{ comment.user.profile.profile_image.url }}" alt="Commentor's profile avatar">
 
     <div class="info2">
-      <span>{{ comment.post.author.username }}</span>
+      <span>{{ comment.user.username }}</span>
       <p>
         {{ comment.content }}
       </p>
     </div>
     <span class="date">{{ comment.created_at }}</span>
+    {% if request.user == comment.user %}
+    <strong>
+      <a href="{% url 'core:comment-delete' post.pk comment.pk %}">Delete comment</a>
+    </strong>
+    {% endif %}
   </div>
   {% endfor %}
 </div>

@@ -16,10 +16,10 @@
   </div>
 
   <div class="right hide-mobile">
-    <a href="{% url 'users:profile' %}">
+    <a href="{% url 'users:profile' request.user.pk %}">
       <div class="user">
-        <img src="{{ user.profilemodel.profile_image.url }}" alt="Profile-image" />
-        <span>{{ user.username }}</span>
+        <img src="{{ request.user.profile.profile_image.url }}" alt="Profile-image" />
+        <span>{{ request.user.username }}</span>
       </div>
     </a>
     <a href="{% url 'users:logout' %}">logout</a>

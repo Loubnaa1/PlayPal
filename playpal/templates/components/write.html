@@ -4,7 +4,7 @@
     <div class="comments">
       <div class="write">
         <!-- Current user image-->
-        <img src="{{ user.profilemodel.profile_image.url }}" alt="Profile-image" />
+        <img src="{{ user.profile.profile_image.url }}" alt="Profile-image" />
 
         <form method="POST">
           {% csrf_token %}
