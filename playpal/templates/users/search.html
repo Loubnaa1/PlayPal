@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Search People : {% endblock %}
+{% block outlet %}
+
+<div class="home">
+  <h1>Search results</h1>
+  {% if no_results %}
+  <h3>No users found for the query "{{ query }}"</h3>
+  {% else %}
+  <h3>Search results for '{{ query }}'.</h3>
+
+  <ul style="list-style: none; margin-top: 50px;">
+    {% for profile in profile_list %}
+    <li>
+      <p>
+        <a href="{% url 'users:profile' profile.pk %}"> @{{ profile.user }}</a>
+        {% if profile.location %}
+      <p> {{ profile.location }}</p>
+      {% endif %}
+      </p>
+    </li>
+    <li>
+      <p>{{ profile.followers.all.count }} Followers</p>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% endif %}
+
+  <a href="{% url 'core:index-page' %}">Back Home</a>
+</div>
+{% endblock %}

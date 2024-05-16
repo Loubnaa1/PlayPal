@@ -39,20 +39,19 @@
       <div class="info">
         <div class="item">
           {% if request.user.is_authenticated %}
-          {% if request.user in post.likes.all %}
-          <a href="{% url 'core:like-post' post.id %}" class="like-btn active">
-            <i class="ri-heart-fill"></i>
-          </a>
-          {% else %}
-          <a href="{% url 'core:like-post' post.id %}" class="unlike-btn">
-            <i class="ri-heart-line"></i>
-          </a>
-          {% endif %}
-          {% endif %}
-          {{ post.get_like_count }} likes
+
+          <form method="POST" action="{% url 'core:likes' post.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}" id="">
+            <button type="submit">
+              <i class="ri-heart-line"><span>{{ post.likes.all.count }}</span></i>
+            </button>
+          </form>
+          {% endif%}
+
         </div>
         <div class="item toggle-comments">
-          <i class="ri-chat-3-line"></i>
+          <i class="ri-chat-3-line" onclick="commentReplyToggle('{{comment.pk}}')"></i>
           Comments : {{ post.comment_count }}
         </div>
         <div class="item">

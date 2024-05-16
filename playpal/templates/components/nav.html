@@ -7,10 +7,11 @@
       <i class="ri-home-4-line"></i>
     </a>
     <i class="ri-moon-line"></i>
-    <form method="get" action="{% url 'core:search' %}">
+    <form method="get" action="{% url 'users:profile-search' %}">
       <div class="search">
-        <i class="ri-search-2-line"></i>
-        <input class="hide-mobile" type="text" name="query" placeholder="Search...">
+        <input class="hide-mobile" type="text" name="query" placeholder="@name..." value="{{ request.GET.query }}">
+        <button style="border: none; background-color: transparent; box-shadow: none;" type="submit "><i
+            class="ri-search-2-line"></i></button>
       </div>
     </form>
   </div>

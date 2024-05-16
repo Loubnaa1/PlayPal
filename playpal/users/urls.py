@@ -2,15 +2,28 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
-from users.views import ProfileView, ProfileEditView, AddFollowers, RemoveFollower
+from users.views import (
+    ProfileView,
+    ProfileEditView,
+    AddFollowers,
+    RemoveFollower,
+    UserSearch,
+    ListFollowers,
+)
 
 app_name = "users"
 urlpatterns = [
+    path("search/", UserSearch.as_view(), name="profile-search"),
     path("sign_up/", views.sign_up, name="sign-up"),
     path("profile/<int:pk>/", ProfileView.as_view(), name="profile"),
     path("profile/<int:pk>/edit/", ProfileEditView.as_view(), name="profile-edit"),
+    path("profile/<int:pk>/followers", ListFollowers.as_view(), name="list-followers"),
     path("profile/<int:pk>/follower/add", AddFollowers.as_view(), name="add-follower"),
-    path("profile/<int:pk>/follower/remove", RemoveFollower.as_view(), name="remove-follower"),
+    path(
+        "profile/<int:pk>/follower/remove",
+        RemoveFollower.as_view(),
+        name="remove-follower",
+    ),
     path(
         "login/",
         auth_views.LoginView.as_view(template_name="users/login.html"),

@@ -72,7 +72,11 @@
       </div>
 
       <div class="right">
-        <p>{{ number_of_followers}} followers</p>
+        {% if number_of_followers > 1 %}
+        <a href="{% url 'users:list-followers' profile.pk %}">{{ number_of_followers}} followers</a>
+        {% else %}
+        <a href="{% url 'users:list-followers' profile.pk %}">{{ number_of_followers}} follower</a>
+        {% endif %}
         <i class="ri-mail-line"></i>
         <i class="ri-more-2-line"></i>
       </div>
@@ -83,6 +87,11 @@
         {% if profile.bio %}
         {{ profile.bio }}
         {% endif %}
+      </li>
+      <li>
+        <!-- {% if profile.dob %} -->
+        <p>Date of Birth: {{ profile.dob|date:"d/m/Y" }}</p>
+        <!-- {% endif %} -->
       </li>
       <li>
         <h1>Posts</h1>

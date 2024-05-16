@@ -7,7 +7,7 @@
       {% csrf_token %}
       {{ form|crispy }}
       <!-- <input type="text" placeholder="Creat Post"> -->
-      <button>comment</button>
+      <button style="margin-top: 5px; align-self: center;">comment</button>
     </form>
   </div>
   <hr>
@@ -16,7 +16,9 @@
     <img src="{{ comment.user.profile.profile_image.url }}" alt="Commentor's profile avatar">
 
     <div class="info2">
-      <span>{{ comment.user.username }}</span>
+      <a href="{% url 'users:profile' post.author.profile.pk %}">
+        <span class="name">@{{ comment.user.username }}</span>
+      </a>
       <p>
         {{ comment.content }}
       </p>
