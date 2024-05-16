@@ -126,7 +126,7 @@ Interested in contributing to PlayPal? We welcome pull requests and issue report
 
 ## Support
 
-For any questions, issues, or feedback, please contact our team at [loubnamerzak4@gmail.com][frankie.1@gmail.com].
+For any questions, issues, or feedback, please contact our team at [loubnamerzak4@gmail.com][frankuwill101@gmail.com].
 
 ---
 
