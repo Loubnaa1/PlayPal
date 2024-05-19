@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import Post, Category, Comment
+from .models import Post, Category, Comment, Notification
 from .forms import CommentForm, PostForm, PostUpdateForm
 from django.http import HttpResponse
 from django.utils.text import slugify
@@ -22,58 +22,19 @@ def is_post_owner(user):
     return post.author == user
 
 
-# @login_required
-# def index_page(request):
-#     """renders the front page"""
-#     logged_in_user = request.user
-#     posts = Post.objects.filter(
-#         Q(status=Post.ACTIVE, author__profile__followers__in=[logged_in_user.id])
-#         | Q(status=Post.ACTIVE, author=logged_in_user)
-#     )
-
-#     if request.method == "POST":
-#         form = PostForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             instance = form.save(commit=False)
-#             instance.author = request.user
-#             instance.save()
-#             return redirect("core:post-detail", pk=instance.id)
-#     else:
-#         form = PostForm()
-
-#     context = {
-#         "posts": posts,
-#         "form": form,
-#     }
-
-#     return render(request, "core/index.html", context)
-
-
 class PostListView(LoginRequiredMixin, View):
-    """A class view that handles post rquest"""
-
     def get(self, request, *args, **kwargs):
-        """A method that handles the get requests"""
-        posts = Post.objects.all().order_by("-created_at")
+        logged_in_user = request.user
+
+        if logged_in_user.is_superuser:
+            posts = Post.objects.all().order_by("-created_at")
+        else:
+            posts = Post.objects.filter(
+                Q(author__profile__followers__in=[logged_in_user.id])
+                | Q(author=logged_in_user)
+            ).order_by("-created_at")
 
         form = PostForm()
-
-        context = {"post_list": posts, "form": form}
-
-        return render(request, "core/index.html", context)
-
-    def post(self, request, *args, **kwargs):
-        """A method that handles the post requests"""
-        posts = Post.objects.all().order_by("-created_at")
-
-        form = PostForm(request.POST)
-
-        if form.is_valid():
-            """Checks for form validity"""
-            new_post = form.save(commit=False)
-            new_post.author = request.user
-            new_post.save()
-            return redirect("core:post-detail", pk=new_post.id)
 
         context = {
             "post_list": posts,
@@ -82,45 +43,27 @@ class PostListView(LoginRequiredMixin, View):
 
         return render(request, "core/index.html", context)
 
+    def post(self, request, *args, **kwargs):
+        logged_in_user = request.user
+        form = PostForm(request.POST, request.FILES)
 
-# @login_required
-# def post_detail(request, pk, status=Post.ACTIVE):
-#     """Renders the post's detailed page"""
-#     post = get_object_or_404(Post, id=pk)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.author = logged_in_user
+            new_post.save()
+            return redirect("core:post-detail", pk=new_post.id)
 
-#     # try:
-#     #     user_liked = Like.objects.filter(post=post, user=request.user).exists()
-#     # except Like.DoesNotExist:
-#     #     user_liked = False
+        posts = Post.objects.filter(
+            Q(author__profile__followers__in=[logged_in_user.id])
+            | Q(author=logged_in_user)
+        ).order_by("-created_at")
 
-#     # Get the total number of likes for the post
-#     # like_count = Like.objects.filter(post=post).count()
+        context = {
+            "post_list": posts,
+            "form": form,
+        }
 
-#     # Retrieve the comments for the current post
-#     comments = Comment.objects.filter(post=post)
-
-#     if request.method == "POST":
-#         form = CommentForm(request.POST)
-
-#         if form.is_valid():
-#             comment = form.save(commit=False)
-#             comment.user = request.user
-#             comment.post = post
-#             comment.save()
-#             # Redirect to the same page to display the new comment
-#             return redirect("core:post-detail", pk=post.id)
-#     else:
-#         form = CommentForm()
-
-#     context = {
-#         "post": post,
-#         "form": form,
-#         # "user_liked": user_liked,
-#         # "like_count": like_count,
-#         "comments": comments,
-#     }
-
-#     return render(request, "core/post_detail.html", context)
+        return render(request, "core/index.html", context)
 
 
 class PostDetailView(LoginRequiredMixin, View):
@@ -150,51 +93,46 @@ class PostDetailView(LoginRequiredMixin, View):
             comment.user = request.user
             comment.post = post
             comment.save()
-            # Redirect to the same page to display the new comment
+            # Create a notification for the post author
+            if request.user != post.author:
+                notification = Notification.objects.create(
+                    notification_type=2,
+                    from_user=request.user,
+                    to_user=post.author,
+                    post=post,
+                )
+
             return redirect("core:post-detail", pk=post.id)
 
         comments = Comment.objects.filter(post=post).order_by("-created_at")
 
         context = {"post": post, "form": form, "comments": comments}
-
         return render(request, "core/post_detail.html", context)
 
 
-# @login_required
-# def like_post(request, pk, status=Post.ACTIVE):
-#     """A view function that handles like/unlike actions"""
+class CommentReplyView(LoginRequiredMixin, View):
+    """A class that handles the nested comment logic"""
 
-#     try:
-#         post = get_object_or_404(Post, id=pk)
+    def post(self, request, post_pk, pk, *args, **kwargs):
+        post = Post.objects.get(pk=post_pk)
+        parent_comment = Comment.objects.get(pk=pk)
+        form = CommentForm(request.POST)
 
-#         if Like.objects.filter(post=post, user=request.user).exists():
-#             Like.objects.filter(post=post, user=request.user).delete()
-#         else:
-#             Like.objects.create(post=post, user=request.user)
-#         return redirect("core:post-detail", pk=pk)
-#     except (Post.DoesNotExist, Like.DoesNotExist) as e:
-#         messages.error(
-#             request,
-#             "An error occured while processing your action, please try again later.",
-#         )
-#         return redirect("core:post-detail")
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.author = request.user
+            new_comment.post = post
+            new_comment.parent = parent_comment
+            new_comment.save()
 
+        notification = Notification.objects.create(
+            notification_type=2,
+            from_user=request.user,
+            to_user=parent_comment.post.author,
+            comment=new_comment,
+        )
 
-# @login_required
-# @user_passes_test(is_post_owner)
-# def post_edit(request, pk, status=Post.ACTIVE):
-#     post = get_object_or_404(Post, id=pk)
-#     if request.method == "POST":
-#         form = PostUpdateForm(request.POST, instance=post)
-#         if form.is_valid():
-#             form.save()
-#             return redirect("core:post-detail", pk=post.id)
-#     else:
-#         form = PostUpdateForm(instance=post)
-
-#     context = {"post": post, "form": form}
-
-#     return render(request, "core/post_edit.html", context)
+        return redirect("core:post-detail", pk=post_pk)
 
 
 class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -226,24 +164,6 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         """Returns boolen expresion"""
         post = self.get_object()
         return self.request.user == post.author
-
-
-# @login_required
-# @user_passes_test(is_post_owner)
-# def comment_delete(request, post_pk, comment_pk):
-#     """A function that deletes a comment"""
-#     comment = Comment.objects.get(id=comment_pk)
-#     post = Post.objects.get(id=post_pk)
-
-#     if request.method == "POST":
-#         comment.delete()
-#         return redirect("core:post-detail", pk=post.id)
-
-#     context = {
-#         "post": post,
-#         "comment": comment,
-#     }
-#     return render(request, "core/delete_comment.html", context)
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -282,21 +202,6 @@ def games_view(request):
     return render(request, "core/games.html")
 
 
-# @login_required
-# def search(request):
-#     """The search function"""
-#     query = request.GET.get("query", "")
-
-#     posts = Post.objects.filter(status=Post.ACTIVE).filter(
-#         Q(title__icontains=query)
-#         | Q(intro__icontains=query)
-#         | Q(content__icontains=query)
-#     )
-#     context = {"posts": posts, "query": query}
-
-#     return render(request, "core/search.html", context)
-
-
 class AddLike(LoginRequiredMixin, View):
     """A class that Adds like"""
 
@@ -321,6 +226,12 @@ class AddLike(LoginRequiredMixin, View):
 
         if not is_like:
             post.likes.add(request.user)
+            notification = Notification.objects.create(
+                notification_type=1,
+                from_user=request.user,
+                to_user=post.author,
+                post=post,
+            )
         elif is_like:
             post.likes.remove(request.user)
 
@@ -372,6 +283,12 @@ class AddCommentLike(LoginRequiredMixin, View):
 
         if not is_like:
             comment.likes.add(request.user)
+            notification = Notification.objects.create(
+                notification_type=2,
+                from_user=request.user,
+                to_user=comment.author,
+                comment=comment,
+            )
         elif is_like:
             comment.likes.remove(request.user)
 
@@ -387,3 +304,38 @@ def robots_txt(request):
     ]
 
     return HttpResponse("\n".join(text), content_type="text/plain")
+
+
+class PostNotification(View):
+    def get(self, request, notification_pk, post_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        post = Post.objects.get(pk=post_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect("core:post-detail", pk=post_pk)
+
+
+class FollowNotification(View):
+    def get(self, request, notification_pk, profile_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        profile = ProfileModel.objects.get(pk=profile_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect("users:profile", pk=profile_pk)
+
+
+class RemoveNotification(View):
+    """A class that hadles notification removal"""
+
+    def delete(self, request, notification_pk, *args, **kwargs):
+        """A method that removes/ delete notification"""
+        notification = Notification.objects.get(pk=notification_pk)
+
+        notification_user_has_seen = True
+        notification.save()
+
+        return HttpResponse("Success", content_type="text/plain")

@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
 from django.db.models import Q, F, Value, Case, When, IntegerField
+from core.models import Notification
 
 # Create your views here.
 
@@ -126,6 +127,10 @@ class AddFollowers(LoginRequiredMixin, View):
         """A class method that makes a post request and add a follower"""
         profile = ProfileModel.objects.get(pk=pk)
         profile.followers.add(request.user)
+
+        notification = Notification.objects.create(
+            notification_type=2, from_user=request.user, to_user=profile.user
+        )
 
         return redirect("users:profile", pk=profile.pk)
 

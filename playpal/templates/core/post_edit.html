@@ -8,9 +8,9 @@
   <div class="post">
     <div class="container">
       <div class="user">
-        <div class="userInfo">
+        <div class="userInfo ">
           <a href="#">
-            <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avater">
+            <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avater">
           </a>
           <div class="details">
             <a href="#">
@@ -19,6 +19,13 @@
             <span class="date">{{ post.created_at }}</span>
           </div>
         </div>
+      </div>
+      <div class="content">
+        {% if post.image %}
+
+        <img src="{{ post.image.url }}" alt="post image">
+        {% endif %}
+        <p>{{ post.content }}</p>
       </div>
       <div class="content">
         <h3>Edit Post</h3>

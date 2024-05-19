@@ -1,3 +1,4 @@
+{% load core_tags %}
 <nav>
   <div class="left">
     <a href="{% url 'core:index-page' %}">
@@ -25,7 +26,9 @@
     </a>
     <a href="{% url 'users:logout' %}">logout</a>
     <i class="ri-user-line"></i>
-    <i class="ri-notification-2-line"></i>
+    <div class="container-notification">
+      {% show_notifications %}
+    </div>
     <i class="ri-mail-line"></i>
   </div>
 </nav>

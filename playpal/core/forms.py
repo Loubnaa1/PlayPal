@@ -6,25 +6,25 @@ class PostForm(forms.ModelForm):
     """Handles the post form"""
 
     content = forms.CharField(
+        label="",
         widget=forms.Textarea(
             attrs={
-                "rows": '3',
+                "rows": "3",
                 "placeholder": "Share your gaming experiences with the community..",
             }
         ),
-        label=False,
     )
 
     image = forms.ImageField(required=False)
 
     class Meta:
         model = Post
-        fields = ("content", "image")
+        fields = ['content', 'image']
 
 
 class CommentForm(forms.ModelForm):
     content = forms.CharField(
-        label = '',
+        label="",
         widget=forms.TextInput(
             attrs={
                 "rows": 2,

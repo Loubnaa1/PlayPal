@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
@@ -50,23 +51,6 @@ class Post(models.Model):
         return f"/{self.slug}/"
 
 
-class Follow(models.Model):
-    pass
-
-
-# class Like(models.Model):
-#     """
-#     A like models that stores the information about like
-#     Fields:
-#         post-> A ForeignKey to the post model, representing the post that is being liked.
-#         user-> A ForegnKey to the post model, representing the user who liked the post.
-#         created_at-> a DatetimeField to store the timestamp when the like was created.
-#     """
-
-#     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_likes")
-#     created_at = models.DateTimeField(auto_now=True)
-
 
 class Comment(models.Model):
     """A comment class"""
@@ -76,14 +60,16 @@ class Comment(models.Model):
     content = models.CharField(max_length=250)
     created_at = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, blank=True, related_name="comment_likes")
+
+    # forein key to the parent class of the comment attribute
     parent = models.ForeignKey(
         "self", on_delete=models.CASCADE, blank=True, null=True, related_name="+"
     )
 
     @property
     def children(self):
-        return Comment.objects.filter(parent=self).order_by('-created_at').all()
-    
+        return Comment.objects.filter(parent=self).order_by("-created_at").all()
+
     @property
     def is_parent(self):
         if self.parent is None:
@@ -113,3 +99,39 @@ class Category(models.Model):
     def get_absolute_url(self):
         """Gets the absolute url"""
         return "/%s/" % self.slug
+
+
+class Notification(models.Model):
+    """
+    A class that handles notification logic
+    Relevance/Meaning:
+        1 -> Like
+        2 -> Comment
+        3 -> Following
+    """
+
+    notification_type = models.IntegerField()
+
+    # The user to recieve notification 
+    to_user = models.ForeignKey(
+        User, related_name="notification_to", on_delete=models.CASCADE, null=True
+    )
+
+    # the user to make notification
+    from_user = models.ForeignKey(
+        User, related_name="notification_from", on_delete=models.CASCADE, null=True
+    )
+
+    # a Post notifcation
+    post = models.ForeignKey(
+        "Post", on_delete=models.CASCADE, related_name="+", blank=True, null=True
+    )
+
+    # A comment notification
+    comment = models.ForeignKey(
+        "Comment", on_delete=models.CASCADE, related_name="+", blank=True, null=True
+    )
+    date = models.DateTimeField(auto_now_add=True)
+    
+    # A boolean value to check if a user has seen a notification or not
+    user_has_seen = models.BooleanField(default=False)
