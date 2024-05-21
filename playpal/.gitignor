@@ -1,0 +1,9 @@
+feat:
+- added direct messages feature
+- inbox notifications for the receiving user
+- read alert
+- error message if user does not exist
+- ability to upload images in dms
+password_reset_complete.html
+
+password_reset_done.html

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Category, Comment, Notification
+from .models import Post, Category, Comment, Notification, ThreadModel, MessageModel
 
 
 class CommentInline(admin.TabularInline):
@@ -43,3 +43,5 @@ admin.site.register(Post, PostAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Notification)
+admin.site.register(ThreadModel)
+admin.site.register(MessageModel)

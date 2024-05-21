@@ -29,6 +29,10 @@
     <div class="container-notification">
       {% show_notifications %}
     </div>
-    <i class="ri-mail-line"></i>
+    <div class="inbox-icon-container">
+      <a href="{% url 'core:inbox' %}" class="inbox-icon">
+        <i class="far fa-envelope inbox-icon"></i>
+      </a>
+    </div>
   </div>
 </nav>

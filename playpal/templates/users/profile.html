@@ -77,7 +77,11 @@
         {% else %}
         <a href="{% url 'users:list-followers' profile.pk %}">{{ number_of_followers}} follower</a>
         {% endif %}
-        <i class="ri-mail-line"></i>
+        <div class="inbox-icon-container">
+          <a href="{% url 'core:inbox' %}" class="inbox-icon">
+            <i class="far fa-envelope inbox-icon"></i>
+          </a>
+        </div>
         <i class="ri-more-2-line"></i>
       </div>
     </div>

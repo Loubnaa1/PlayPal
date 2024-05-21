@@ -1,18 +1,21 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Post, Category, Comment, Notification
-from .forms import CommentForm, PostForm, PostUpdateForm
+from .models import Post, Category, Comment, Notification, MessageModel
+from .forms import CommentForm, PostForm, ThreadForm, MessageForm
 from django.http import HttpResponse
 from django.utils.text import slugify
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
+from django.contrib import messages
 from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
 from django.views import View
 from users.models import ProfileModel
+from .models import ThreadModel
 
 
 def is_post_owner(user):
@@ -328,6 +331,20 @@ class FollowNotification(View):
         return redirect("users:profile", pk=profile_pk)
 
 
+class ThreadNotification(View):
+    """A class that handles thread notification logic"""
+
+    def get(self, request, notification_pk, object_pk, *args, **kwargs):
+        """Gets the notification object and mark it as seen and redirect to thread"""
+        notification = Notification.objects.get(pk=notification_pk)
+        thread = ThreadModel.objects.get(pk=object_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect("core:thread", pk=object_pk)
+
+
 class RemoveNotification(View):
     """A class that hadles notification removal"""
 
@@ -339,3 +356,101 @@ class RemoveNotification(View):
         notification.save()
 
         return HttpResponse("Success", content_type="text/plain")
+
+
+class ListThread(View):
+    """A class that handles the thred view"""
+
+    def get(self, request, *args, **kwargs):
+        """A method that gets the lists of thread"""
+        threads = ThreadModel.objects.filter(
+            Q(user=request.user) | Q(receiver=request.user)
+        )
+
+        context = {"threads": threads}
+        return render(request, "core/inbox.html", context)
+
+
+class CreateThread(View):
+    """A class that handles create and sends methods for creating a thread"""
+
+    def get(self, request, *args, **kwargs):
+        """handles the get request logic"""
+        form = ThreadForm()
+
+        context = {"form": form}
+
+        return render(request, "core/create_thread.html", context)
+
+    def post(self, request, *args, **kwargs):
+        """This handles the logic of creating a new thread"""
+        form = ThreadForm(request.POST)
+
+        username = request.POST.get("username")
+        try:
+            receiver = User.objects.get(username=username)
+            # Does the thread exist?
+            if ThreadModel.objects.filter(
+                user=request.user, receiver=receiver
+            ).exists():
+                thread = ThreadModel.objects.filter(
+                    user=request.user, receiver=receiver
+                )[0]
+                return redirect("core:thread", pk=thread.pk)
+            elif ThreadModel.objects.filter(
+                user=receiver, receiver=request.user
+            ).exists():
+                thread = ThreadModel.objects.filter(
+                    user=receiver, receiver=request.user
+                )[0]
+                return redirect("core:thread", pk=thread.pk)
+            # if not
+            if form.is_valid():
+                thread = ThreadModel(user=request.user, receiver=receiver)
+                thread.save()
+                return redirect("core:thread", pk=thread.pk)
+
+        except:
+            messages.error(
+                request, "Invalid Username, please try again with a valid username"
+            )
+            # if user does not exists
+            return redirect("core:create-thread")
+
+
+class ThreadView(View):
+    """A thread view class"""
+
+    def get(self, request, pk, *args, **kwargs):
+        form = MessageForm()
+        thread = ThreadModel.objects.get(pk=pk)
+        message_list = MessageModel.objects.filter(thread__pk__contains=pk)
+        context = {"thread": thread, "form": form, "message_list": message_list}
+
+        return render(request, "core/thread.html", context)
+
+
+class CreateMessage(View):
+    """A seperate view that redirects to whereever view one wish to go to"""
+
+    def post(self, request, pk, *args, **kwargs):
+        form = MessageForm(request.POST, request.FILES)
+        thread = ThreadModel.objects.get(pk=pk)
+
+        if thread.receiver == request.user:
+            receiver = thread.user
+        else:
+            receiver = thread.receiver
+
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.thread = thread
+            message.sender_user = request.user
+            message.receiver_user = receiver
+            message.save()
+
+        notfication = Notification.objects.create(
+            notification_type=4, from_user=request.user, to_user=receiver, thread=thread
+        )
+
+        return redirect("core:thread", pk=pk)

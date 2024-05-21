@@ -35,10 +35,18 @@
         onclick="removeNotification(`{% url 'core:notification-delete' notification.pk %}`, `{{ request.path }}`)">&times;</span>
     </div>
     {% endif %}
+    {% elif notification.thread %}
+    <div class="dropdown-item-parent">
+      <a href="{% url 'core:thread-notification' notification.pk notification.thread.pk %}">
+        {{ notification.from_user }} sent you a message
+      </a>
+      <span class="dropdown-item-close"
+        onclick="removeNotification(`{% url 'core:notification-delete' notification.pk %}`, `{{ request.path }}`)">&times;</span>
+    </div>
     {% else %}
     <div class="dropdown-item-parent">
-      <a href="{% url 'core:follow-notification' notification.pk notification.from_user.profile.pk %}">@{{
-        notification.from_user }} has started followed you!</a>
+      <a href="{% url 'core:follow-notification' notification.pk notification.from_user.profile.pk %}">@{{notification.from_user}}
+        started following you!</a>
       <span class="dropdown-item-close"
         onclick="removeNotification(`{% url 'core:notification-delete' notification.pk %}`, `{{ request.path }}`)">&times;</span>
     </div>

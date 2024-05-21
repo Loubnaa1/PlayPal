@@ -51,7 +51,6 @@ class Post(models.Model):
         return f"/{self.slug}/"
 
 
-
 class Comment(models.Model):
     """A comment class"""
 
@@ -83,6 +82,28 @@ class Comment(models.Model):
         return self.content
 
 
+class ThreadModel(models.Model):
+    """A thread class that handles the thread logic"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class MessageModel(models.Model):
+    """A message module that handles the message logic"""
+
+    thread = models.ForeignKey(
+        "ThreadModel", related_name="+", on_delete=models.CASCADE, blank=True, null=True
+    )
+    sender_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    receiver_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    content = models.CharField(max_length=1000)
+    image = models.ImageField(upload_to="uploads/message_photos", blank=True, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+
 class Category(models.Model):
     """A category class that inherits from models module"""
 
@@ -108,11 +129,12 @@ class Notification(models.Model):
         1 -> Like
         2 -> Comment
         3 -> Following
+        4 -> Dm
     """
 
     notification_type = models.IntegerField()
 
-    # The user to recieve notification 
+    # The user to recieve notification
     to_user = models.ForeignKey(
         User, related_name="notification_to", on_delete=models.CASCADE, null=True
     )
@@ -131,7 +153,11 @@ class Notification(models.Model):
     comment = models.ForeignKey(
         "Comment", on_delete=models.CASCADE, related_name="+", blank=True, null=True
     )
+    # Thread Notification
+    thread = models.ForeignKey(
+        "ThreadModel", on_delete=models.CASCADE, related_name="+", blank=True, null=True
+    )
     date = models.DateTimeField(auto_now_add=True)
-    
+
     # A boolean value to check if a user has seen a notification or not
     user_has_seen = models.BooleanField(default=False)

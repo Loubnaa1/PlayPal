@@ -1,0 +1,33 @@
+.empty-text {
+  color: #777;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.sent-message {
+  background-color: #f3f3;
+  border-radius: 20px;
+  padding: 10px 25px;
+  width: 50%;
+}
+
+.received-message {
+  background-color: rgb(1, 196, 255);
+  color: white;
+  border-radius: 20px;
+  padding: 10px 25px;
+  width: 50%;
+}
+
+.message-receiver-container {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.message-image {
+  margin:auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Comment, Post
+from .models import Comment, Post, MessageModel
 
 
 class PostForm(forms.ModelForm):
@@ -19,10 +19,12 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['content', 'image']
+        fields = ["content", "image"]
 
 
 class CommentForm(forms.ModelForm):
+    """A comment form for making comments"""
+
     content = forms.CharField(
         label="",
         widget=forms.TextInput(
@@ -47,9 +49,28 @@ class CommentForm(forms.ModelForm):
 
 
 class PostUpdateForm(forms.ModelForm):
+    """A post form for editing posts"""
+
     class Meta:
         model = Post
         fields = (
             "content",
             "status",
         )
+
+
+class ThreadForm(forms.Form):
+    """A thread form for making threads posts"""
+
+    username = forms.CharField(label="", max_length=100)
+
+
+class MessageForm(forms.ModelForm):
+    """A message form for users input"""
+
+    content = forms.CharField(label="", max_length=1000)
+    image = forms.ImageField(required=False)
+
+    class Meta:
+        model = MessageModel
+        fields = ["content", "image"]
