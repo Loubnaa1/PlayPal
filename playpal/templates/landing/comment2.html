@@ -1,0 +1,31 @@
+{% load crispy_forms_tags %}
+
+<div class="container">
+  <div class="comments row justify-content-cent mt-3 mb-5">
+    <div class="write col-md-5 col-ms-12">
+      <!-- Current user image-->
+      <img src="{{ request.user.profile.profile_image.url }}" alt="user profile avatar" />
+      <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <!-- <input type="text" placeholder="Creat Post"> -->
+        <button>comment</button>
+      </form>
+    </div>
+    <!-- {% for comment in post.comments.all %} -->
+    <div class="comment">
+      <!-- <img src="{{ comment.user.profile.profile_image.url }}" alt="Commentor's profile avatar"> -->
+
+      <div class="info2">
+        <a href="{% url 'users:profile' post.author.profile.pk %}">
+          <span class="name">@{{ comment.user.username }}</span>
+        </a>
+        <p>
+          <!-- {{ comment.content }} -->
+        </p>
+        <hr>
+      </div>
+    </div>
+    <!-- {% endfor %} -->
+  </div>
+</div>

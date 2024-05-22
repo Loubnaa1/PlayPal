@@ -31,6 +31,11 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "users.apps.UsersConfig",
+    "core.apps.CoreConfig",
+    "crispy_forms",
+    "crispy_bootstrap5",
+    "landing",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -38,11 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
-    "core.apps.CoreConfig",
-    "users.apps.UsersConfig",
-    "crispy_forms",
-    "crispy_bootstrap5",
-    "landing",
 ]
 
 MIDDLEWARE = [
@@ -131,15 +131,45 @@ STATICFILES_DIRS = [
 
 LOGIN_REDIRECT_URL = "core:index-page"
 
-LOGIN_URL = 'users:login'
-
+LOGIN_URL = "users:login"
 
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-STATIC_ROOT = BASE_DIR / 'asset'
+STATIC_ROOT = BASE_DIR / "asset"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
+CACHE_TIMEOUT = 3600  # 1hour
+
+
+#   SMTP Configuration
+
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# # EMAIL_HOST_USER = 'pllaypall@gmail.com'
+# EMAIL_HOST_USER = "unitylens0@gmail.com"
+# EMAIL_HOST_PASSWORD = "kddsioreiwkxykwd"
+# # EMAIL_HOST_PASSWORD = 'skullisland'
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = "unitylens0@gmail.com"
+EMAIL_HOST_PASSWORD = "kddsioreiwkxykwd"
+EMAIL_USE_SSL = True

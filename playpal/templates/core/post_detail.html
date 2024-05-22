@@ -7,7 +7,7 @@
     <div class="container">
       <div class="user">
         <div class="userInfo">
-          <a href="{% url 'users:profile' post.author.pk %}">
+          <a href="{% url 'profile' post.author.pk %}">
             <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avater">
           </a>
           <div class="details">
@@ -34,25 +34,26 @@
 
         <img src="{{ post.image.url }}" alt="post image">
         {% endif %}
-        <p>{{ post.content }}</p>
+        <div class="body">
+          <p>{{ post.content }}</p>
+        </div>
       </div>
       <div class="info">
         <div class="item">
           {% if request.user.is_authenticated %}
-          {% if request.user in post.likes.all %}
-          <a href="{% url 'core:like-post' post.id %}" class="like-btn active">
-            <i class="ri-heart-fill"></i>
-          </a>
-          {% else %}
-          <a href="{% url 'core:like-post' post.id %}" class="unlike-btn">
-            <i class="ri-heart-line"></i>
-          </a>
-          {% endif %}
-          {% endif %}
-          {{ post.get_like_count }} likes
+
+          <form method="POST" action="{% url 'core:likes' post.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}" id="">
+            <button type="submit">
+              <i class="ri-heart-line"><span>{{ post.likes.all.count }}</span></i>
+            </button>
+          </form>
+          {% endif%}
+
         </div>
         <div class="item toggle-comments">
-          <i class="ri-chat-3-line"></i>
+          <i class="ri-chat-3-line" onclick="commentReplyToggle('{{comment.pk}}')"></i>
           Comments : {{ post.comment_count }}
         </div>
         <div class="item">
@@ -64,7 +65,7 @@
           Bookmarks
         </div>
         <div class="item">
-          <a href="{% url 'core:category' post.slug %}"></a>
+          <a href="#"></a>
           <i class="ri-chat-thread-fill"></i>
           <span>Category: {{ post.category }}</span>
           </a>

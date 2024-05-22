@@ -1,63 +1,95 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Post, Category, Like, Comment
-from .forms import CommentForm, PostForm, PostUpdateForm
+from .models import Post, Category, Comment, Notification, MessageModel
+from .forms import CommentForm, PostForm, ThreadForm, MessageForm, SharedForm
 from django.http import HttpResponse
 from django.utils.text import slugify
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.views.generic.edit import DeleteView
+from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import HttpResponseRedirect
+from django.views import View
+from users.models import ProfileModel
+from .models import ThreadModel, Tag
+from django.utils import timezone
+import requests
+from django.conf import settings
+from django.core.cache import cache
+from .forms import ExploreForm
 
 
 def is_post_owner(user):
     """Checks if the user is the owner of the post being deleted, edited etc"""
     pk = user.resolver_match.kwargs.get("pk")
     post = get_object_or_404(Post, id=pk)
-    return Post.author == user
+    return post.author == user
 
 
-@login_required
-def index_page(request):
-    """renders the front page"""
-    posts = Post.objects.filter(status=Post.ACTIVE)
+class PostListView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        logged_in_user = request.user
 
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.author = request.user
-            instance.save()
-            return redirect("core:post-detail", pk=instance.id)
-    else:
+        if logged_in_user.is_superuser:
+            posts = Post.objects.all().order_by("-created_at")
+        else:
+            posts = Post.objects.filter(
+                Q(author__profile__followers__in=[logged_in_user.id])
+                | Q(author=logged_in_user)
+            ).order_by("-created_at")
+
         form = PostForm()
+        shared_form = SharedForm()
 
-    context = {
-        "posts": posts,
-        "form": form,
-    }
+        context = {"post_list": posts, "form": form, "shared_form": shared_form}
 
-    return render(request, "core/index.html", context)
+        return render(request, "core/index.html", context)
+
+    def post(self, request, *args, **kwargs):
+        logged_in_user = request.user
+        form = PostForm(request.POST, request.FILES)
+        shared_form = SharedForm()
+
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.author = logged_in_user
+            new_post.save()
+            new_post.create_tags()
+            return redirect("core:post-detail", pk=new_post.id)
+
+        posts = Post.objects.filter(
+            Q(author__profile__followers__in=[logged_in_user.id])
+            | Q(author=logged_in_user)
+        ).order_by("-created_at")
+
+        context = {"post_list": posts, "form": form, "shared_form": shared_form}
+
+        return render(request, "core/index.html", context)
 
 
-@login_required
-def post_detail(request, pk, status=Post.ACTIVE):
-    """Renders the post's detailed page"""
-    post = get_object_or_404(Post, id=pk)
+class PostDetailView(LoginRequiredMixin, View):
+    """A class post detail class"""
 
-    try:
-        user_liked = Like.objects.filter(post=post, user=request.user).exists()
-    except Like.DoesNotExist:
-        user_liked = False
+    def get(self, request, pk, *args, **kwargs):
+        """A get requeste method"""
+        post = Post.objects.get(pk=pk)
+        form = CommentForm()
 
-    # Get the total number of likes for the post
-    like_count = Like.objects.filter(post=post).count()
+        comments = Comment.objects.filter(post=post).order_by("-created_at")
 
-    # Retrieve the comments for the current post
-    comments = Comment.objects.filter(post=post)
+        context = {
+            "post": post,
+            "form": form,
+            "comments": comments,
+        }
+        return render(request, "core/post_detail.html", context)
 
-    if request.method == "POST":
+    def post(self, request, pk, *args, **kwargs):
+        """A post request method"""
+        post = Post.objects.get(pk=pk)
         form = CommentForm(request.POST)
 
         if form.is_valid():
@@ -65,90 +97,97 @@ def post_detail(request, pk, status=Post.ACTIVE):
             comment.user = request.user
             comment.post = post
             comment.save()
-            # Redirect to the same page to display the new comment
+            comment.create_tags()
+            # Create a notification for the post author
+            if request.user != post.author:
+                notification = Notification.objects.create(
+                    notification_type=2,
+                    from_user=request.user,
+                    to_user=post.author,
+                    post=post,
+                )
+
             return redirect("core:post-detail", pk=post.id)
-    else:
-        form = CommentForm()
 
-    context = {
-        "post": post,
-        "form": form,
-        "user_liked": user_liked,
-        "like_count": like_count,
-        "comments": comments,
-    }
+        comments = Comment.objects.filter(post=post).order_by("-created_at")
 
-    return render(request, "core/post_detail.html", context)
+        context = {"post": post, "form": form, "comments": comments}
+        return render(request, "core/post_detail.html", context)
 
 
-@login_required
-def like_post(request, pk, status=Post.ACTIVE):
-    """A view function that handles like/unlike actions"""
+class CommentReplyView(LoginRequiredMixin, View):
+    """A class that handles the nested comment logic"""
 
-    try:
-        post = get_object_or_404(Post, id=pk)
+    def post(self, request, post_pk, pk, *args, **kwargs):
+        post = Post.objects.get(pk=post_pk)
+        parent_comment = Comment.objects.get(pk=pk)
+        form = CommentForm(request.POST)
 
-        if Like.objects.filter(post=post, user=request.user).exists():
-            Like.objects.filter(post=post, user=request.user).delete()
-        else:
-            Like.objects.create(post=post, user=request.user)
-        return redirect("core:post-detail", pk=pk)
-    except (Post.DoesNotExist, Like.DoesNotExist) as e:
-        messages.error(
-            request,
-            "An error occured while processing your action, please try again later.",
-        )
-        return redirect("core:post-detail")
-
-
-@login_required
-@user_passes_test(is_post_owner)
-def post_edit(request, pk, status=Post.ACTIVE):
-    post = get_object_or_404(Post, id=pk)
-    if request.method == "POST":
-        form = PostUpdateForm(request.POST, instance=post)
         if form.is_valid():
-            form.save()
-            return redirect("core:post-detail", pk=post.id)
-    else:
-        form = PostUpdateForm(instance=post)
+            new_comment = form.save(commit=False)
+            new_comment.author = request.user
+            new_comment.post = post
+            new_comment.parent = parent_comment
+            new_comment.save()
 
-    context = {"post": post, "form": form}
+        notification = Notification.objects.create(
+            notification_type=2,
+            from_user=request.user,
+            to_user=parent_comment.post.author,
+            comment=new_comment,
+        )
 
-    return render(request, "core/post_edit.html", context)
-
-
-@login_required
-@user_passes_test(is_post_owner)
-def post_delete(request, pk, status=Post.ACTIVE):
-    """A function that deletes a post"""
-
-    post = Post.objects.get(id=pk)
-    if request.method == "POST":
-        post.delete()
-        return redirect("core:index-page")
-    context = {
-        "post": post,
-    }
-    return render(request, "core/delete_post.html", context)
+        return redirect("core:post-detail", pk=post_pk)
 
 
-@login_required
-@user_passes_test(is_post_owner)
-def comment_delete(request, post_pk, comment_pk):
-    """A function that deletes a comment"""
-    comment = Comment.objects.get(id=comment_pk)
-    post = Post.objects.get(id=post_pk)
+class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """A class that handles posts edit logic"""
 
-    if request.method == "POST":
-        comment.delete()
-        return redirect("core:post-detail", pk=post.id)
+    model = Post
+    fields = ["content"]
+    template_name = "core/post_edit.html"
 
-    context = {
-        "post": post,
-        "comment": comment,
-    }
-    return render(request, "core/delete_comment.html", context)
+    def get_success_url(self):
+        pk = self.kwargs["pk"]
+
+        return reverse_lazy("core:post-detail", kwargs={"pk": pk})
+
+    def test_func(self):
+        """Returns boolen expresion"""
+        post = self.get_object()
+        return self.request.user == post.author
+
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """A class that handles posts delete logic"""
+
+    model = Post
+    template_name = "core/delete_post.html"
+    success_url = reverse_lazy("core:index-page")
+
+    def test_func(self):
+        """Returns boolen expresion"""
+        post = self.get_object()
+        return self.request.user == post.author
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = "core/delete_comment.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["post"] = self.get_object().post
+        return context
+
+    def get_success_url(self):
+        """Gets the url after successfully deleting comment"""
+        return reverse_lazy("core:post-detail", kwargs={"pk": self.object.post.pk})
+
+    def test_func(self):
+        """Returns boolean expression"""
+        comment = self.get_object()
+        return self.request.user == comment.user
 
 
 @login_required
@@ -162,25 +201,98 @@ def category(request, slug):
     return render(request, "core/category.html", context)
 
 
-@login_required
-def games_view(request):
-    """renders the game page"""
-    return render(request, "core/games.html")
+class AddLike(LoginRequiredMixin, View):
+    """A class that Adds like"""
+
+    def post(self, request, pk, *args, **kwargs):
+        post = Post.objects.get(pk=pk)
+
+        is_dislike = False
+
+        for dislike in post.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if is_dislike:
+            post.dislikes.remove(request.user)
+
+        is_like = False
+        for like in post.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if not is_like:
+            post.likes.add(request.user)
+            notification = Notification.objects.create(
+                notification_type=1,
+                from_user=request.user,
+                to_user=post.author,
+                post=post,
+            )
+        elif is_like:
+            post.likes.remove(request.user)
+
+        next = request.POST.get("next", "/")
+        return HttpResponseRedirect(next)
 
 
-@login_required
-def search(request):
-    """The search function"""
-    query = request.GET.get("query", "")
+class Dislike(LoginRequiredMixin, View):
+    """A class that removes likes"""
 
-    posts = Post.objects.filter(status=Post.ACTIVE).filter(
-        Q(title__icontains=query)
-        | Q(intro__icontains=query)
-        | Q(content__icontains=query)
-    )
-    context = {"posts": posts, "query": query}
+    def post(self, request, pk, *args, **kwargs):
+        post = Post.objects.get(pk=pk)
 
-    return render(request, "core/search.html", context)
+        for like in post.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+        if is_like:
+            post.likes.remove(request.user)
+
+        is_dislike = False
+
+        for dislike in post.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if not is_dislike:
+            post.dislikes.add(request.user)
+
+        if is_dislike:
+            post.dislikes.remove(request.user)
+
+        next = request.POST.get("next", "/")
+        return HttpResponseRedirect(next)
+
+
+class AddCommentLike(LoginRequiredMixin, View):
+    """A class that Adds likes to the comment"""
+
+    def post(self, request, pk, *args, **kwargs):
+        comment = Comment.objects.get(pk=pk)
+
+        is_like = False
+        for like in comment.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if not is_like:
+            comment.likes.add(request.user)
+            notification = Notification.objects.create(
+                notification_type=2,
+                from_user=request.user,
+                to_user=comment.author,
+                comment=comment,
+            )
+        elif is_like:
+            comment.likes.remove(request.user)
+
+        next = request.POST.get("next", "/")
+        return HttpResponseRedirect(next)
 
 
 def robots_txt(request):
@@ -193,12 +305,264 @@ def robots_txt(request):
     return HttpResponse("\n".join(text), content_type="text/plain")
 
 
-# class PostListView(View):
-#     def get(self, request, *args, **kwargs):
-#         posts = Post.objects.all().order_by('-created_at')
+class PostNotification(View):
+    def get(self, request, notification_pk, post_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        post = Post.objects.get(pk=post_pk)
 
-#         context = {
-#             'post_list': posts,
-#         }
+        notification.user_has_seen = True
+        notification.save()
 
-#         return render(request, 'landing/post_list.html', context)
+        return redirect("core:post-detail", pk=post_pk)
+
+
+class FollowNotification(View):
+    def get(self, request, notification_pk, profile_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        profile = ProfileModel.objects.get(pk=profile_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect("profile", pk=profile_pk)
+
+
+class ThreadNotification(View):
+    """A class that handles thread notification logic"""
+
+    def get(self, request, notification_pk, object_pk, *args, **kwargs):
+        """Gets the notification object and mark it as seen and redirect to thread"""
+        notification = Notification.objects.get(pk=notification_pk)
+        thread = ThreadModel.objects.get(pk=object_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect("core:thread", pk=object_pk)
+
+
+class RemoveNotification(View):
+    """A class that hadles notification removal"""
+
+    def delete(self, request, notification_pk, *args, **kwargs):
+        """A method that removes/ delete notification"""
+        notification = Notification.objects.get(pk=notification_pk)
+
+        notification_user_has_seen = True
+        notification.save()
+
+        return HttpResponse("Success", content_type="text/plain")
+
+
+class ListThread(View):
+    """A class that handles the thred view"""
+
+    def get(self, request, *args, **kwargs):
+        """A method that gets the lists of thread"""
+        threads = ThreadModel.objects.filter(
+            Q(user=request.user) | Q(receiver=request.user)
+        )
+
+        context = {"threads": threads}
+        return render(request, "core/inbox.html", context)
+
+
+class CreateThread(View):
+    """A class that handles create and sends methods for creating a thread"""
+
+    def get(self, request, *args, **kwargs):
+        """handles the get request logic"""
+        form = ThreadForm()
+
+        context = {"form": form}
+
+        return render(request, "core/create_thread.html", context)
+
+    def post(self, request, *args, **kwargs):
+        """This handles the logic of creating a new thread"""
+        form = ThreadForm(request.POST)
+
+        username = request.POST.get("username")
+        try:
+            receiver = User.objects.get(username=username)
+            # Does the thread exist?
+            if ThreadModel.objects.filter(
+                user=request.user, receiver=receiver
+            ).exists():
+                thread = ThreadModel.objects.filter(
+                    user=request.user, receiver=receiver
+                )[0]
+                return redirect("core:thread", pk=thread.pk)
+            elif ThreadModel.objects.filter(
+                user=receiver, receiver=request.user
+            ).exists():
+                thread = ThreadModel.objects.filter(
+                    user=receiver, receiver=request.user
+                )[0]
+                return redirect("core:thread", pk=thread.pk)
+            # if not
+            if form.is_valid():
+                thread = ThreadModel(user=request.user, receiver=receiver)
+                thread.save()
+                return redirect("core:thread", pk=thread.pk)
+
+        except:
+            messages.error(
+                request, "Invalid Username, please try again with a valid username"
+            )
+            # if user does not exists
+            return redirect("core:create-thread")
+
+
+class ThreadView(View):
+    """A thread view class"""
+
+    def get(self, request, pk, *args, **kwargs):
+        form = MessageForm()
+        thread = ThreadModel.objects.get(pk=pk)
+        message_list = MessageModel.objects.filter(thread__pk__contains=pk)
+        context = {"thread": thread, "form": form, "message_list": message_list}
+
+        return render(request, "core/thread.html", context)
+
+
+class CreateMessage(View):
+    """A seperate view that redirects to whereever view one wish to go to"""
+
+    def post(self, request, pk, *args, **kwargs):
+        form = MessageForm(request.POST, request.FILES)
+        thread = ThreadModel.objects.get(pk=pk)
+
+        if thread.receiver == request.user:
+            receiver = thread.user
+        else:
+            receiver = thread.receiver
+
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.thread = thread
+            message.sender_user = request.user
+            message.receiver_user = receiver
+            message.save()
+
+        notfication = Notification.objects.create(
+            notification_type=4, from_user=request.user, to_user=receiver, thread=thread
+        )
+
+        return redirect("core:thread", pk=pk)
+
+
+class SharedPost(View):
+    """A class that handles the shared post logic"""
+
+    def get(self, request, pk, *args, **kwargs):
+        """Gets the original post to be shared"""
+        original_post = Post.objects.get(pk=pk)
+        form = SharedForm()
+        context = {
+            "original_post": original_post,
+            "shared_form": form,
+        }
+        return render(request, "core/index.html", context)
+
+    def post(self, request, pk, *args, **kwargs):
+        """Handles the sharing of a post"""
+        original_post = Post.objects.get(pk=pk)
+        form = SharedForm(request.POST)
+
+        if form.is_valid():
+            new_post = Post(
+                shared_content=form.cleaned_data["content"],
+                content=original_post.content,
+                author=original_post.author,
+                created_at=original_post.created_at,
+                shared_user=request.user,
+                shared_at=timezone.now(),
+            )
+            new_post.save()
+            return redirect("core:index-page")
+
+        context = {
+            "original_post": original_post,
+            "shared_form": form,
+        }
+        return render(request, "core/index.html", context)
+
+
+class TrendingGamesView(View):
+    def get(self, request, *args, **kwargs):
+        """Make the API request to Reddit"""
+
+        trending_games = cache.get("trending_games")
+        if trending_games is not None:
+            return render(
+                request, "core/games.html", {"trending_games": trending_games}
+            )
+
+        # fectch data from Reddit API
+
+        try:
+            response = requests.get("https://www.reddit.com/r/gaming/new.json?limit=10")
+            response.raise_for_status()
+            data = response.json()
+            trending_games = [
+                "post"["data"]["title"] for post in data["data"]["children"]
+            ]
+
+            # Cach the trending games data for a certain duration
+            cache.set("treanding_games", trending_games, timeout=settings.CACHE_TIMEOUT)
+
+            return render(
+                request, "core/games.html", {"trending_games": trending_games}
+            )
+        except request.execptions.RequestException as e:
+            return render(request, "core/games.html", {"error": str(e)})
+
+        # Process the response data
+        data = response.json()
+        trending_games = [post["data"]["title"] for post in data["data"]["children"]]
+
+        # Pass the trending games to the template
+        context = {"trending_games": trending_games}
+        return render(request, "core/games.html", context)
+
+
+class Explore(View):
+    """A class that performs the explore logic"""
+
+    def get(self, request, *args, **kwargs):
+        explore_form = ExploreForm()
+
+        query = self.request.GET.get("query")
+        tag = Tag.objects.filter(name=query).first()
+
+        if tag:
+            posts = Post.objects.filter(tags__in=[tag])
+        else:
+            posts = Post.objects.all()
+
+        context = {
+            "tag": tag,
+            "posts": posts,
+            "explore_form": explore_form,
+        }
+
+        return render(request, "core/explore.html", context)
+
+    def post(self, request, *args, **kwargs):
+        explore_form = ExploreForm(request.POST)
+        if explore_form.is_valid():
+            query = explore_form.cleaned_data["query"]
+            tag = Tag.objects.filter(name=query).first()
+
+            posts = None
+            if tag:
+                posts = Post.objects.filter(tags__in=[tag])
+            if posts:
+                context = {"tag": tag, "posts": posts}
+            else:
+                context = {
+                    "tag": tag,
+                }
+            return HttpResponseRedirect(f"/core/explore?query={query}")
+        return HttpResponseRedirect("/core/explore")

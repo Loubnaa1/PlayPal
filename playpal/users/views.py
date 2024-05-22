@@ -11,6 +11,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
+from django.db.models import Q, F, Value, Case, When, IntegerField
+from core.models import Notification
 
 # Create your views here.
 
@@ -22,7 +24,7 @@ def sign_up(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("users:login")
+            return redirect("login")
     else:
         form = SignUpForm()
 
@@ -35,7 +37,7 @@ def sign_up(request):
 def logout_view(request):
     """A logout function"""
     logout(request)
-    return redirect("users:login")
+    return redirect("login")
 
 
 # login_required()
@@ -111,7 +113,7 @@ class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         pk = self.kwargs["pk"]
-        return reverse_lazy("users:profile", kwargs={"pk": pk})
+        return reverse_lazy("profile", kwargs={"pk": pk})
 
     def test_func(self):
         profile = self.get_object()
@@ -126,7 +128,11 @@ class AddFollowers(LoginRequiredMixin, View):
         profile = ProfileModel.objects.get(pk=pk)
         profile.followers.add(request.user)
 
-        return redirect("users:profile", pk=profile.pk)
+        notification = Notification.objects.create(
+            notification_type=2, from_user=request.user, to_user=profile.user
+        )
+
+        return redirect("profile", pk=profile.pk)
 
 
 class RemoveFollower(LoginRequiredMixin, View):
@@ -137,4 +143,46 @@ class RemoveFollower(LoginRequiredMixin, View):
         profile = ProfileModel.objects.get(pk=pk)
         profile.followers.remove(request.user)
 
-        return redirect("users:profile", pk=profile.pk)
+        return redirect("profile", pk=profile.pk)
+
+
+class UserSearch(View):
+    """A search class that performs relevant search functions"""
+
+    def get(self, request, *args, **kwargs):
+        """
+        A method that performs the search query by relevance:
+            If the search query matched the user's username, the relevance score is set to 3.
+            If the search query matched the user's name, the relevance score is set to 2.
+            If the search query matched the user's bio or location, the relevance score is set to 1.
+            If the search query did not match any of the above fields, the relevance score is set to 0.
+
+        """
+        query = self.request.GET.get("query")
+        profile_list = ProfileModel.objects.annotate(
+            relevance_score=Case(
+                When(user__username__icontains=query, then=Value(3)),
+                When(name__icontains=query, then=Value(2)),
+                When(bio__icontains=query, then=Value(1)),
+                When(location__icontains=query, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        ).order_by("-relevance_score")
+
+        context = {"profile_list": profile_list, "query": query}
+
+        return render(request, "users/search.html", context)
+
+
+class ListFollowers(View):
+    """A class that lists the number of followers"""
+
+    def get(self, request, pk, *args, **kwargs):
+        """Returns the list of number of followers"""
+        profile = ProfileModel.objects.get(pk=pk)
+        followers = profile.followers.all()
+
+        context = {"profile": profile, "followers": followers}
+
+        return render(request, "users/followers_list.html", context)

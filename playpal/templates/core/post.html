@@ -1,13 +1,14 @@
-{% for post in posts %}
+{% load crispy_forms_tags %}
+{% for post in post_list %}
 <div class="post">
   <div class="container">
     <div class="user">
       <div class="userInfo">
-        <a href="{% url 'users:profile' post.author.profile.pk %}">
+        <a href="{% url 'profile' post.author.profile.pk %}">
           <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avatar">
         </a>
         <div class="details">
-          <a href="{% url 'users:profile' post.author.profile.pk %}">
+          <a href="{% url 'profile' post.author.profile.pk %}">
             <span class="name">@{{ post.author.username }}</span>
           </a>
           <span class="date">{{ post.created_at |timesince }} ago</span>
@@ -15,7 +16,7 @@
       </div>
     </div>
     <div class="content">
-      <a href="{% url 'core:post-detail' post.id %}">
+      <div class="body">
         <p>
           {% if post.content|length > 149 %}
           {{ post.content|truncatechars:150 }} <span class="see-more" style="color: blue;">see more</span>
@@ -23,26 +24,28 @@
           {{ post.content }}
           {% endif %}
         </p>
-        {% if post.image %}
-        <img src="{{ post.image.url }}" alt="post image">
-        {% endif %}
+      </div>
+
+      {% if post.image %}
+      <a href="{% url 'core:post-detail' post.id %}" />
+      <img src="{{ post.image.url }}" alt="post image">
       </a>
+      {% endif %}
     </div>
 
     <div class="info">
       <div class="item">
-        {% if request.user.is_authenticated %}
-        {% if user_liked %}
-        <a href="{% url 'core:like-post' post.id %}" class="like-btn active">
-          <i class="ri-heart-fill"></i>
-        </a>
-        {% else %}
-        <a href="{% url 'core:like-post' post.id %}" class="unlike-btn">
-          <i class="ri-heart-line"></i>
-        </a>
-        {% endif %}
-        {% endif %}
-        {{ post.get_like_count }} likes
+        <form method="POST" action="{% url 'core:likes' post.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}" id="">
+          <button type="submit">
+            <i class="ri-heart-line"><span>{{ post.likes.all.count }}</span></i>
+          </button>
+        </form>
+
+        <i class="ri-heart-fill"></i>
+
+        likes
       </div>
 
       <a href="{% url 'core:post-detail' post.id %}">
@@ -51,9 +54,8 @@
           Comments : {{ post.comment_count }}
         </div>
       </a>
-
       <div class="item">
-        <i class="ri-share-line"></i>
+        <span onclick="shareToggle('{{ post.pk }}')"><i class="ri-share-line share-btn"></i></span>
         12 Share
       </div>
       <div class="item">
@@ -61,12 +63,19 @@
         Bookmarks
       </div>
       <div class="item">
-        <a href="{% url 'core:category' post.slug %}"></a>
+        <a href="#"></a>
         <i class="ri-chat-thread-fill"></i>
         <span>Category: {{ post.category }}</span>
         </a>
       </div>
     </div>
   </div>
+  <form action="{% url 'core:share-post' post.pk %}" class="d-none" id="{{ post.pk }}">
+    {% csrf_token %}
+    {{ shared_form | crispy }}
+    <div class="d-grid gap-2">
+      <button class="btn btn-primary m-3">Share</button>
+    </div>
+  </form>
 </div>
 {% endfor %}

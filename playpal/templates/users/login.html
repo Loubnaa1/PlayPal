@@ -7,13 +7,24 @@
 <div class="login">
   <div class="card">
     <div class="left">
+      <!-- <<<<<<< HEAD
       <h1>Gear up, your next quest awaits! let's game on!</h1>
       <span>Hit the button, squad up, and let's conquer the leaderboard together. Your epic journey starts now—noobs and pros alike, Sign in to join the ultimate gaming alliance."</span>
       <a href="{% url 'users:sign-up' %}">
+======= -->
+      <h1>Welcome Pall!</h1>
+      <p>Welcome back
+
+        forgotten password? <br>
+        click <a href="{% url 'reset_password' %}">here</a> to reset password
+      </p>
+      <span>Not a registered member?</span>
+      <a href="{% url 'sign-up' %}">
+        <!-- >>>>>>> frankie -->
         <button>Sign Up</button>
       </a>
     </div>
-    <div class="right">
+    <!-- <div class="right">
       <h1>Login Page</h1>
       <form method="POST">
         {% csrf_token %}
@@ -22,7 +33,7 @@
         </p>
         <button type="submit" class="login-button">Login</button>
       </form>
-    </div>
+    </div> -->
   </div>
 </div>
 {% endblock %}

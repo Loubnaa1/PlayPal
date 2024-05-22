@@ -8,9 +8,9 @@
   <div class="post">
     <div class="container">
       <div class="user">
-        <div class="userInfo">
-          <a href="{% url 'users:profile' %}">
-            <img src="{{ post.author.profilemodel.profile_image.url }}" alt="user profile avater">
+        <div class="userInfo ">
+          <a href="#">
+            <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avater">
           </a>
           <div class="details">
             <a href="#">
@@ -21,8 +21,15 @@
         </div>
       </div>
       <div class="content">
+        {% if post.image %}
+
+        <img src="{{ post.image.url }}" alt="post image">
+        {% endif %}
+        <p>{{ post.content }}</p>
+      </div>
+      <div class="content">
         <h3>Edit Post</h3>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           {{ form|crispy }}
           <input type="submit" value="save">

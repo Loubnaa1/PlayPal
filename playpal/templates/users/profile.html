@@ -55,15 +55,15 @@
           </div>
         </div>
         {% if request.user == user %}
-        <a href="{% url 'users:profile-edit' profile.pk %}">Edit Profile</a>
+        <a href="{% url 'profile-edit' profile.pk %}">Edit Profile</a>
         {% else %}
         {% if is_following %}
-        <form method="POST" action="{% url 'users:remove-follower' profile.pk %}">
+        <form method="POST" action="{% url 'remove-follower' profile.pk %}">
           {% csrf_token %}
           <button type="submit">Unfollow</button>
         </form>
         {% else %}
-        <form method="POST" action="{% url 'users:add-follower' profile.pk %}">
+        <form method="POST" action="{% url 'add-follower' profile.pk %}">
           {% csrf_token %}
           <button type="submit">Follow</button>
         </form>
@@ -72,31 +72,113 @@
       </div>
 
       <div class="right">
-        <p>{{ number_of_followers}} followers</p>
-        <i class="ri-mail-line"></i>
+        {% if number_of_followers > 1 %}
+        <a href="{% url 'list-followers' profile.pk %}">{{ number_of_followers}} followers</a>
+        {% else %}
+        <a href="{% url 'list-followers' profile.pk %}">{{ number_of_followers}} follower</a>
+        {% endif %}
+        <div class="inbox-icon-container">
+          <a href="{% url 'core:inbox' %}" class="inbox-icon">
+            <i class="far fa-envelope inbox-icon"></i>
+          </a>
+        </div>
         <i class="ri-more-2-line"></i>
       </div>
     </div>
     <ul>
       <li>
-        <h3>bio</h3>
+        <h3">bio</h3>
         {% if profile.bio %}
         {{ profile.bio }}
         {% endif %}
       </li>
       <li>
-        <h1>Posts</h1>
-      </li>
-      <li>
-        {% for post in posts %}
-      <li>
-        <p><a href="{% url 'users:profile' post.author.profile.pk %}">@{{ post.author }}</a></p>
-        <a href="{% url 'core:post-detail' post.id %}"></a>
-        {{ post.content }}
-      </li>
-      {% endfor %}
+        <!-- {% if profile.dob %} -->
+        <p>Date of Birth: {{ profile.dob|date:"d/m/Y" }}</p>
+        <!-- {% endif %} -->
       </li>
     </ul>
+
+    {% load crispy_forms_tags %}
+    {% for post in posts %}
+    <div class="post">
+      <div class="container">
+        <div class="user">
+          <div class="userInfo">
+            <a href="{% url 'profile' post.author.profile.pk %}">
+              <img src="{{ post.author.profile.profile_image.url }}" alt="user profile avatar">
+            </a>
+            <div class="details">
+              <a href="{% url 'profile' post.author.profile.pk %}">
+                <span class="name">@{{ post.author.username }}</span>
+              </a>
+              <span class="date">{{ post.created_at |timesince }} ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <a href="{% url 'core:post-detail' post.id %}">
+            <div class="body">
+              <p>
+                {% if post.content|length > 149 %}
+                {{ post.content|truncatechars:150 }} <span class="see-more" style="color: blue;">see more</span>
+                {% else %}
+                {{ post.content }}
+                {% endif %}
+              </p>
+            </div>
+            {% if post.image %}
+            <img src="{{ post.image.url }}" alt="post image">
+            {% endif %}
+          </a>
+        </div>
+
+        <div class="info">
+          <div class="item">
+            <form method="POST" action="{% url 'core:likes' post.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}" id="">
+              <button type="submit">
+                <i class="ri-heart-line"><span>{{ post.likes.all.count }}</span></i>
+              </button>
+            </form>
+
+            <i class="ri-heart-fill"></i>
+
+            likes
+          </div>
+
+          <a href="{% url 'core:post-detail' post.id %}">
+            <div class="item toggle-comments">
+              <i class="ri-chat-3-line"></i>
+              Comments : {{ post.comment_count }}
+            </div>
+          </a>
+          <div class="item">
+            <span onclick="shareToggle('{{ post.pk }}')"><i class="ri-share-line share-btn"></i></span>
+            12 Share
+          </div>
+          <div class="item">
+            <i class="ri-bookmark-line"></i>
+            Bookmarks
+          </div>
+          <div class="item">
+            <a href="#"></a>
+            <i class="ri-chat-thread-fill"></i>
+            <span>Category: {{ post.category }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <form action="{% url 'core:share-post' post.pk %}" class="d-none" id="{{ post.pk }}">
+        {% csrf_token %}
+        {{ shared_form | crispy }}
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary m-3">Share</button>
+        </div>
+      </form>
+    </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}
