@@ -74,3 +74,18 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = MessageModel
         fields = ["content", "image"]
+
+
+class SharedForm(forms.Form):
+    content = forms.CharField(
+        label="",
+        widget=forms.Textarea(attrs={"rows": "3", "placeholder": "Say something..."}),
+    )
+
+
+class ExploreForm(forms.Form):
+    """A form that gives the user input field to search for a post that matches the query"""
+
+    query = forms.CharField(
+        label="", widget=forms.TextInput(attrs={"placeholder": "explore tags"})
+    )

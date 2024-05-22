@@ -19,6 +19,16 @@ function showNotifications() {
 
 }
 
+function shareToggle(parent_id) {
+  const container = document.getElementById(parent_id);
+  if (container.classList.contains('d-none')) {
+    container.classList.remove('d-none');
+  } else {
+    container.classList.add('d-none');
+  }
+}
+
+
 // Django get cookies function
 function getCookie(name) {
   let cookieValue = null;
@@ -63,3 +73,23 @@ function removeNotification(removeNotificationURL, redirectURL) {
   // sends the data
   xmlhttp.send();
 }
+
+function formatTags() {
+  const elements = document.getElementsByClassName('body');
+  for (let i = 0; i < elements.length; i++) {
+    let bodyText = elements[i].children[0].innerText;
+
+    let words = bodyText.split(' ');
+
+    for (let j = 0; j < words.length; j++) {
+      if (words[j][0] === '#') {
+        let url = '/core/explore?query=' + encodeURIComponent(words[j].substring(0));
+        let replaceText = bodyText.replace(/\s\#(.*?)(\s|$)/g, `<a href="${url}">${words[j]}</a>`);
+        elements[i].innerHTML = replaceText;
+      }
+    }
+  }
+}
+
+
+formatTags();

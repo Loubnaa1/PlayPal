@@ -89,3 +89,8 @@
 .unlike-btn:hover {
   color: #e53935;
 }
+
+.body a {
+  text-decoration: none;
+  color: royalblue;
+}

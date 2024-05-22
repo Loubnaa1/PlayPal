@@ -11,7 +11,7 @@ from users.views import (
     ListFollowers,
 )
 
-app_name = "users"
+
 urlpatterns = [
     path("search/", UserSearch.as_view(), name="profile-search"),
     path("sign_up/", views.sign_up, name="sign-up"),
@@ -31,31 +31,31 @@ urlpatterns = [
     ),
     path("logout/", views.logout_view, name="logout"),
     path(
-        "password_reset/",
+        "reset_password/",
         auth_views.PasswordResetView.as_view(
-            template_name="landing/password_reset.html"
+            template_name="registration/password_reset_form.html"
         ),
-        name="password_reset",
+        name="reset_password",
     ),
     path(
-        "password_reset_done/",
+        "reset_password_sent/",
         auth_views.PasswordResetDoneView.as_view(
-            template_name="landing/password_reset_done.html"
+            template_name="registration/password_reset_done.html"
         ),
         name="password_reset_done",
     ),
     path(
-        "password_reset_confirm/<uidb64>/<token>/",
+        "reset/<uidb64>/<token>/",
         auth_views.PasswordResetConfirmView.as_view(
-            template_name="landing/password_reset_confirm.html"
+            template_name="registration/password_reset_confirm.html"
         ),
         name="password_reset_confirm",
     ),
     path(
-        "password_reset_complete/",
+        "reset_password_complete/",
         auth_views.PasswordResetCompleteView.as_view(
-            template_name="landing/password_reset_complete.html"
+            template_name="registration/password_reset_complete.html"
         ),
-        name="password_reset_complete",
+        name="password_reset_complete/",
     ),
 ]

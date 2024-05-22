@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import (
-    games_view,
     category,
     CommentDeleteView,
     AddLike,
@@ -19,12 +18,15 @@ from .views import (
     ThreadView,
     CreateMessage,
     ThreadNotification,
+    SharedPost,
+    TrendingGamesView,
+    Explore,
 )
 
 app_name = "core"
 urlpatterns = [
-    # path("search/", search, name="search"),
     path("index/", PostListView.as_view(), name="index-page"),
+    path("trending-games/", TrendingGamesView.as_view(), name="trending-games"),
     # Messages
     path("inbox/", ListThread.as_view(), name="inbox"),
     path("inbox/create-thread/", CreateThread.as_view(), name="create-thread"),
@@ -36,6 +38,7 @@ urlpatterns = [
     path("post/<int:pk>/", PostDetailView.as_view(), name="post-detail"),
     path("post/edit/<int:pk>/", PostEditView.as_view(), name="edit-post"),
     path("post/delete/<int:pk>/", PostDeleteView.as_view(), name="delete-post"),
+    path("core/explore/", Explore.as_view(), name="explore"),
     path(
         "inbox/<int:pk>/create-message/", CreateMessage.as_view(), name="create-message"
     ),
@@ -51,8 +54,8 @@ urlpatterns = [
     ),
     path("post/<int:pk>/like", AddLike.as_view(), name="likes"),
     path("post/<int:pk>/dislike", Dislike.as_view(), name="dislike"),
-    path("games/", games_view, name="games"),
     path("<slug:slug>/", category, name="category"),
+    path("post/<int:pk>/share", SharedPost.as_view(), name="share-post"),
     # Notifications
     path(
         "notification/<int:notification_pk>/post/<int:post_pk>",

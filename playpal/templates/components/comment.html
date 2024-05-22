@@ -16,7 +16,7 @@
     <img src="{{ comment.user.profile.profile_image.url }}" alt="Commentor's profile avatar">
 
     <div class="info2">
-      <a href="{% url 'users:profile' post.author.profile.pk %}">
+      <a href="{% url 'profile' post.author.profile.pk %}">
         <span class="name">@{{ comment.user.username }}</span>
       </a>
       <p>

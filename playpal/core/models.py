@@ -11,17 +11,35 @@ class Post(models.Model):
 
     CHOICES_STATUS = [(ACTIVE, "Active"), (DRAFT, "Draft")]
 
+    shared_content = models.TextField(blank=True, null=True)
     slug = models.SlugField(unique=True, blank=True, null=True)
     content = models.TextField(max_length=400)
     created_at = models.DateTimeField(auto_now_add=True)
+    shared_at = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=10, choices=CHOICES_STATUS, default=ACTIVE)
     image = models.ImageField(upload_to="uploads/post_photos", blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    shared_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="+", blank=True, null=True
+    )
     likes = models.ManyToManyField(User, blank=True, related_name="likes")
     dislikes = models.ManyToManyField(User, blank=True, related_name="dislikes")
+    tags = models.ManyToManyField("Tag", blank=True)
+
+    def create_tags(self):
+        for word in self.content.split():
+            if word[0] == "#":
+                tag = Tag.objects.filter(name=word[1:]).first()
+                if tag:
+                    self.tags.add(tag.pk)
+                else:
+                    tag = Tag(name=word[1:])
+                    tag.save()
+                    self.tags.add(tag.pk)
+                self.save()
 
     class Meta:
-        ordering = ("-created_at",)
+        ordering = ("-created_at", "-shared_at")
 
     def comment_count(self):
         """Counts the comment of a post"""
@@ -59,6 +77,19 @@ class Comment(models.Model):
     content = models.CharField(max_length=250)
     created_at = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, blank=True, related_name="comment_likes")
+    tags = models.ManyToManyField("Tag", blank=True)
+
+    def create_tags(self):
+        for word in self.content.split():
+            if word[0] == "#":
+                tag = Tag.objects.get(name=word[1:])
+                if tag:
+                    self.tags.add(tag.pk)
+                else:
+                    tag = Tag(name=word[1:])
+                    tag.save()
+                    self.tags.add(tag.pk)
+                self.save()
 
     # forein key to the parent class of the comment attribute
     parent = models.ForeignKey(
@@ -161,3 +192,7 @@ class Notification(models.Model):
 
     # A boolean value to check if a user has seen a notification or not
     user_has_seen = models.BooleanField(default=False)
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=255)

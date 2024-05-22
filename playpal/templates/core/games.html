@@ -5,6 +5,11 @@
 
 {% block outlet %}
 <div class="home">
-  <h1 style="align-items: center;">Post</h1>
+  <h3>Trending Games</h3>
+  <ul>
+    {% for game in trending_games %}
+    <li>{{ game }}</li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}

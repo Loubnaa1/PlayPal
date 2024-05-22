@@ -24,7 +24,7 @@ def sign_up(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("users:login")
+            return redirect("login")
     else:
         form = SignUpForm()
 
@@ -37,7 +37,7 @@ def sign_up(request):
 def logout_view(request):
     """A logout function"""
     logout(request)
-    return redirect("users:login")
+    return redirect("login")
 
 
 # login_required()
@@ -113,7 +113,7 @@ class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         pk = self.kwargs["pk"]
-        return reverse_lazy("users:profile", kwargs={"pk": pk})
+        return reverse_lazy("profile", kwargs={"pk": pk})
 
     def test_func(self):
         profile = self.get_object()
@@ -132,7 +132,7 @@ class AddFollowers(LoginRequiredMixin, View):
             notification_type=2, from_user=request.user, to_user=profile.user
         )
 
-        return redirect("users:profile", pk=profile.pk)
+        return redirect("profile", pk=profile.pk)
 
 
 class RemoveFollower(LoginRequiredMixin, View):
@@ -143,7 +143,7 @@ class RemoveFollower(LoginRequiredMixin, View):
         profile = ProfileModel.objects.get(pk=pk)
         profile.followers.remove(request.user)
 
-        return redirect("users:profile", pk=profile.pk)
+        return redirect("profile", pk=profile.pk)
 
 
 class UserSearch(View):

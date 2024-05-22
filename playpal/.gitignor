@@ -1,4 +1,4 @@
-feat:
+Message:
 - added direct messages feature
 - inbox notifications for the receiving user
 - read alert
@@ -7,3 +7,5 @@ feat:
 password_reset_complete.html
 
 password_reset_done.html
+
+Sharing post:

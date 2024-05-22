@@ -3,19 +3,23 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Post, Category, Comment, Notification, MessageModel
-from .forms import CommentForm, PostForm, ThreadForm, MessageForm
+from .forms import CommentForm, PostForm, ThreadForm, MessageForm, SharedForm
 from django.http import HttpResponse
 from django.utils.text import slugify
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.contrib import messages
 from django.views.generic.edit import DeleteView, UpdateView
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
 from django.views import View
 from users.models import ProfileModel
-from .models import ThreadModel
+from .models import ThreadModel, Tag
+from django.utils import timezone
+import requests
+from django.conf import settings
+from django.core.cache import cache
+from .forms import ExploreForm
 
 
 def is_post_owner(user):
@@ -38,22 +42,22 @@ class PostListView(LoginRequiredMixin, View):
             ).order_by("-created_at")
 
         form = PostForm()
+        shared_form = SharedForm()
 
-        context = {
-            "post_list": posts,
-            "form": form,
-        }
+        context = {"post_list": posts, "form": form, "shared_form": shared_form}
 
         return render(request, "core/index.html", context)
 
     def post(self, request, *args, **kwargs):
         logged_in_user = request.user
         form = PostForm(request.POST, request.FILES)
+        shared_form = SharedForm()
 
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.author = logged_in_user
             new_post.save()
+            new_post.create_tags()
             return redirect("core:post-detail", pk=new_post.id)
 
         posts = Post.objects.filter(
@@ -61,10 +65,7 @@ class PostListView(LoginRequiredMixin, View):
             | Q(author=logged_in_user)
         ).order_by("-created_at")
 
-        context = {
-            "post_list": posts,
-            "form": form,
-        }
+        context = {"post_list": posts, "form": form, "shared_form": shared_form}
 
         return render(request, "core/index.html", context)
 
@@ -96,6 +97,7 @@ class PostDetailView(LoginRequiredMixin, View):
             comment.user = request.user
             comment.post = post
             comment.save()
+            comment.create_tags()
             # Create a notification for the post author
             if request.user != post.author:
                 notification = Notification.objects.create(
@@ -197,12 +199,6 @@ def category(request, slug):
     context = {"category": category, "posts": posts}
 
     return render(request, "core/category.html", context)
-
-
-@login_required
-def games_view(request):
-    """renders the game page"""
-    return render(request, "core/games.html")
 
 
 class AddLike(LoginRequiredMixin, View):
@@ -328,7 +324,7 @@ class FollowNotification(View):
         notification.user_has_seen = True
         notification.save()
 
-        return redirect("users:profile", pk=profile_pk)
+        return redirect("profile", pk=profile_pk)
 
 
 class ThreadNotification(View):
@@ -454,3 +450,119 @@ class CreateMessage(View):
         )
 
         return redirect("core:thread", pk=pk)
+
+
+class SharedPost(View):
+    """A class that handles the shared post logic"""
+
+    def get(self, request, pk, *args, **kwargs):
+        """Gets the original post to be shared"""
+        original_post = Post.objects.get(pk=pk)
+        form = SharedForm()
+        context = {
+            "original_post": original_post,
+            "shared_form": form,
+        }
+        return render(request, "core/index.html", context)
+
+    def post(self, request, pk, *args, **kwargs):
+        """Handles the sharing of a post"""
+        original_post = Post.objects.get(pk=pk)
+        form = SharedForm(request.POST)
+
+        if form.is_valid():
+            new_post = Post(
+                shared_content=form.cleaned_data["content"],
+                content=original_post.content,
+                author=original_post.author,
+                created_at=original_post.created_at,
+                shared_user=request.user,
+                shared_at=timezone.now(),
+            )
+            new_post.save()
+            return redirect("core:index-page")
+
+        context = {
+            "original_post": original_post,
+            "shared_form": form,
+        }
+        return render(request, "core/index.html", context)
+
+
+class TrendingGamesView(View):
+    def get(self, request, *args, **kwargs):
+        """Make the API request to Reddit"""
+
+        trending_games = cache.get("trending_games")
+        if trending_games is not None:
+            return render(
+                request, "core/games.html", {"trending_games": trending_games}
+            )
+
+        # fectch data from Reddit API
+
+        try:
+            response = requests.get("https://www.reddit.com/r/gaming/new.json?limit=10")
+            response.raise_for_status()
+            data = response.json()
+            trending_games = [
+                "post"["data"]["title"] for post in data["data"]["children"]
+            ]
+
+            # Cach the trending games data for a certain duration
+            cache.set("treanding_games", trending_games, timeout=settings.CACHE_TIMEOUT)
+
+            return render(
+                request, "core/games.html", {"trending_games": trending_games}
+            )
+        except request.execptions.RequestException as e:
+            return render(request, "core/games.html", {"error": str(e)})
+
+        # Process the response data
+        data = response.json()
+        trending_games = [post["data"]["title"] for post in data["data"]["children"]]
+
+        # Pass the trending games to the template
+        context = {"trending_games": trending_games}
+        return render(request, "core/games.html", context)
+
+
+class Explore(View):
+    """A class that performs the explore logic"""
+
+    def get(self, request, *args, **kwargs):
+        explore_form = ExploreForm()
+
+        query = self.request.GET.get("query")
+        tag = Tag.objects.filter(name=query).first()
+
+        if tag:
+            posts = Post.objects.filter(tags__in=[tag])
+        else:
+            posts = Post.objects.all()
+
+        context = {
+            "tag": tag,
+            "posts": posts,
+            "explore_form": explore_form,
+        }
+
+        return render(request, "core/explore.html", context)
+
+    def post(self, request, *args, **kwargs):
+        explore_form = ExploreForm(request.POST)
+        if explore_form.is_valid():
+            query = explore_form.cleaned_data["query"]
+            tag = Tag.objects.filter(name=query).first()
+
+            posts = None
+            if tag:
+                posts = Post.objects.filter(tags__in=[tag])
+            if posts:
+                context = {"tag": tag, "posts": posts}
+            else:
+                context = {
+                    "tag": tag,
+                }
+            return HttpResponseRedirect(f"/core/explore?query={query}")
+        return HttpResponseRedirect("/core/explore")
