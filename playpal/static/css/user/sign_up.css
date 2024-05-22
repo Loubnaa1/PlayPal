@@ -9,7 +9,6 @@
 
   .card {
     display: flex;
-    width: 50%;
     background-color: white;
     border-radius: 30px;
     min-height: 600px;
