@@ -13,7 +13,7 @@
     {% for profile in profile_list %}
     <li>
       <p>
-        <a href="{% url 'users:profile' profile.pk %}"> @{{ profile.user }}</a>
+        <a href="{% url 'profile' profile.pk %}"> @{{ profile.user }}</a>
         {% if profile.location %}
       <p> {{ profile.location }}</p>
       {% endif %}

@@ -13,7 +13,9 @@
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {{ form|crispy }}
-      <a href="{% url 'users:profile' object.pk %}">cancel</a>
+      <button class="btn btn-primary m-3">
+        <a href="{% url 'profile' object.pk %}">cancel</a>
+      </button>
       <button type="submit">save</button>
     </form>
   </li>
