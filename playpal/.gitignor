@@ -2,8 +2,32 @@ password_reset_complete.html
 
 password_reset_done.html
 
-Sharing post:
+Sharing post
 
-users/__pycache__/
+users/__pycache__
+playpal/playpal/__pycache__
+core/templatetags/__pycache__
+core/__pycache__
 
-
+core/__pycache__/__init__.cpython-310.pyc
+core/__pycache__/admin.cpython-310.pyc
+core/__pycache__/apps.cpython-310.pyc
+core/__pycache__/forms.cpython-310.pyc
+core/__pycache__/models.cpython-310.pyc
+core/__pycache__/urls.cpython-310.pyc
+core/__pycache__/views.cpython-310.pyc
+core/migrations/__pycache__/0001_initial.cpython-310.pyc
+core/migrations/__pycache__/0002_notification_thread.cpython-310.pyc
+core/migrations/__pycache__/0003_alter_post_options_post_shared_at_and_more.cpython-310.pyc
+core/migrations/__pycache__/0004_tag_comment_tags_post_tags.cpython-310.pyc
+core/migrations/__pycache__/__init__.cpython-310.pyc
+core/templatetags/__pycache__/__init__.cpython-310.pyc
+core/templatetags/__pycache__/core_tags.cpython-310.pyc
+playpal/__pycache__/__init__.cpython-310.pyc
+playpal/__pycache__/settings.cpython-310.pyc
+playpal/__pycache__/sitemaps.cpython-310.pyc
+playpal/__pycache__/urls.cpython-310.pyc
+playpal/__pycache__/wsgi.cpython-310.pyc
+users/__pycache__/signals.cpython-310.pyc
+users/__pycache__/urls.cpython-310.pyc
+users/__pycache__/views.cpython-c
